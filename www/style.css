@@ -1,0 +1,15 @@
+
+
+.star-rating, .star-rating-empty {
+	color: #ef6c30;
+	font-family: FontAwesome;
+	content:'\f005';
+}
+
+.star-rating {
+	font-weight: 900;
+}
+
+.star-rating-empty {
+	font-weight: 0;
+}
