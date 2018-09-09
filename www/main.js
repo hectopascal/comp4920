@@ -1,39 +1,6 @@
 
-function appendCourse(c_code, c_title, c_faculty, c_school, c_study_level,
-	c_terms, c_campus, c_hours, c_info, rating)
+function appendRating(rating)
 {
-	var celem  = document.createElement('div');
-	var cflex  = document.createElement('div');
-	cflex.setAttribute('class', 'd-flex align-content-start flex-wrap mb-2');
-	{
-		var cbadge = document.createElement('span');
-		cbadge.setAttribute('class', 'my-2 mx-1 badge badge-dark');
-		cbadge.appendChild(document.createTextNode('COURSE'));
-		var slevel_badge = document.createElement('span');
-
-		if(c_study_level == 'UGRD')
-			slevel_badge.setAttribute('class', 'my-2 mx-1 badge badge-success');
-		else
-			slevel_badge.setAttribute('class', 'my-2 mx-2 badge badge-warning');
-
-		slevel_badge.appendChild(document.createTextNode(c_study_level));
-		cflex.appendChild(cbadge);
-		cflex.appendChild(slevel_badge);
-	}
-	var cnode  = document.createElement('h4');
-	cnode.setAttribute('class', 'ml-2');
-	var cnode1 = document.createElement('p');
-	var title  = document.createTextNode(c_code + ': ' + c_title);
-	var info   = document.createTextNode(c_info);
-	cnode.appendChild(title);
-
-
-	cflex.appendChild(cnode);
-
-	celem.appendChild(cflex);
-	cnode1.appendChild(info);
-	celem.appendChild(cnode1);
-
 	var crating = document.createElement('span');
 	for(i = 0; i < 5; i++)
 	{
@@ -48,7 +15,62 @@ function appendCourse(c_code, c_title, c_faculty, c_school, c_study_level,
 		rating--;
 	}
 	crating.setAttribute('class', 'ml-2');
-	cflex.appendChild(crating);
+
+	return crating;
+}
+
+function appendPost(user_title, rating, post)
+{
+	var cpost = document.createElement('div');
+	cpost.setAttribute('class', 'py-2 bg-light');
+	var cpost_title = document.createElement('div');
+	cpost_title.setAttribute('class', 'd-flex bg-dark text-white p-1 rounded');
+	cpost_title.appendChild(document.createTextNode(user_title + ' posted:'));
+	cpost.appendChild(cpost_title);
+
+	var ccontent = document.createElement('div');
+	ccontent.setAttribute('class', 'pl-2 p-1');
+	ccontent.appendChild(document.createTextNode(post));
+	cpost.appendChild(ccontent);
+
+	return cpost;
+}
+
+function appendCourse(c_code, c_title, c_faculty, c_school, c_study_level,
+	c_terms, c_campus, c_hours, c_info, rating)
+{
+	var celem  = document.createElement('div');
+	var cflex  = document.createElement('div');
+	cflex.setAttribute('class', 'd-flex align-content-start flex-wrap mb-2');
+	{
+		var cbadge = document.createElement('span');
+		cbadge.setAttribute('class', 'my-2 mx-1 badge badge-dark');
+		cbadge.appendChild(document.createTextNode('COURSE'));
+		var slevel_badge = document.createElement('span');
+
+		if(c_study_level == 'UGRD')
+			slevel_badge.setAttribute('class', 'my-2 ml-1 mr-2 badge badge-success');
+		else
+			slevel_badge.setAttribute('class', 'my-2 ml-1 mr-2 badge badge-warning');
+
+		slevel_badge.appendChild(document.createTextNode(c_study_level));
+		cflex.appendChild(cbadge);
+		cflex.appendChild(slevel_badge);
+	}
+	var cnode  = document.createElement('h4');
+	var cnode1 = document.createElement('p');
+	var title  = document.createTextNode(c_code + ': ' + c_title);
+	var info   = document.createTextNode(c_info);
+	cnode.appendChild(title);
+
+
+	cflex.appendChild(cnode);
+
+	celem.appendChild(cflex);
+	cnode1.appendChild(info);
+	celem.appendChild(cnode1);
+
+	cflex.appendChild(appendRating(rating));
 
 	var ccomments = document.createElement('div');
 	var load_prompt = document.createElement('button');
@@ -70,7 +92,11 @@ function appendCourse(c_code, c_title, c_faculty, c_school, c_study_level,
 	var ttt  = document.createTextNode('I did not enjoy this course.');
 	collapsing_forum.setAttribute('class', 'collapse');
 	collapsing_forum.setAttribute('id', c_code + '_forum');
-	collapsing_forum.appendChild(ttt);
+	collapsing_forum.appendChild(appendPost('stupid', 4, 'hmmm... course not very good'));
+	collapsing_forum.appendChild(appendPost('idiot', 4, 'it\'s alright'));
+	collapsing_forum.appendChild(appendPost('user', 4, 'amazing course but quite difficult'));
+	collapsing_forum.appendChild(appendPost('user1', 4, 'horrible lecturer'));
+	collapsing_forum.appendChild(appendPost('user2', 4, 'hello'));
 
 	load_prompt.addEventListener('click', function()
 		{
@@ -84,14 +110,13 @@ function appendCourse(c_code, c_title, c_faculty, c_school, c_study_level,
 			}
 			else
 			{
-				console.log('hi');
 				this.setAttribute('toggled', 'y');
 				this.children[0].setAttribute('class', 'fas fa-chevron-up');
 			}
 		});
 
 	ccomments.appendChild(load_prompt);
-	ccomments.setAttribute('class', 'd-flex justify-content-center mt-2');
+	ccomments.setAttribute('class', 'd-flex justify-content-center mt-2 mb-2');
 	celem.appendChild(ccomments);
 
 	celem.appendChild(collapsing_forum);
