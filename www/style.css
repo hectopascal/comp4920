@@ -1,4 +1,7 @@
-
+.forum {
+	display: none;
+	overflow: hidden;
+}
 
 .star-rating, .star-rating-empty {
 	color: #ef6c30;
