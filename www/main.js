@@ -117,14 +117,86 @@ function appendCourse(c_code, c_title, c_faculty, c_school, c_study_level,
 
 	ccomments.appendChild(load_prompt);
 	ccomments.setAttribute('class', 'd-flex justify-content-center mt-2 mb-2');
-	celem.appendChild(ccomments);
 
+
+	celem.appendChild(ccomments);
 	celem.appendChild(collapsing_forum);
 
-	celem.setAttribute("class", 'p-3 bg-white');
+	celem.setAttribute("class", 'p-3 bg-white course_summary');
 	celem.setAttribute("style", 'margin-top:20px;margin-bottom:20px; box-shadow:0 0 4px 0 rgba(0,0,0,0.2); border-radius:10px;');
 
 	document.getElementById('main_body').appendChild(celem);
+}
+
+function reviewForm(k)
+{
+    var div = document.createElement('div');
+    div.setAttribute('class', "collapse");
+    div.id    = "reviewDiv"+k.toString();
+   
+   
+    var f = document.createElement("form");
+    f.setAttribute('method',"post");
+    f.setAttribute('action',"form.js");
+    f.id = "reviewform";
+
+    //create input element
+    var i = document.createElement("input");
+    i.type = "text";
+    i.class = "control-label-col-sm-2";
+    i.name = "name_box";
+    i.id = "nBox";
+    i.placeholder = "Display Name";
+
+    var review = document.createElement("textarea");
+    review.cols = "50";
+    review.rows = "4";
+    review.type = "textarea";
+    review.name = "review_box";
+    review.id = "rBox";
+    review.placeholder = "Write your review here...";
+
+    //create a rating dropdown //
+    // TODO (to beautify to stars later)
+    var r = document.createElement("SELECT");
+    r.id = "rating_box";
+    r.name = "rBox";
+    for (var k = 1; k<=5; k++){
+        var z = document.createElement("option");
+        var val = k.toString();
+        z.setAttribute("value", val);
+        t = document.createTextNode(val);
+        z.appendChild(t);
+        r.appendChild(z);
+    }
+
+    //create a submit button
+    var s = document.createElement("input");
+    s.type = "submit";
+    s.value = "Submit";
+   
+    // add all elements to the form
+    var p = document.createElement('p');
+    f.appendChild(p);
+
+    f.appendChild(i);
+    p = document.createElement('p');
+    f.appendChild(p);
+    
+    f.appendChild(document.createTextNode("Rate the course:  "))
+    f.appendChild(r);
+	p = document.createElement('p');
+    f.appendChild(p);
+    
+    f.appendChild(review);
+    p = document.createElement('p');
+    f.appendChild(p); 
+
+    f.appendChild(s);
+    
+    div.appendChild(f);
+    return div;
+
 }
 
 function main()
@@ -133,7 +205,26 @@ function main()
 		1, 'Kensington', 6, 'This course introduces students to the basics of programming. The objective of this course is for students to develop proficiency in program design and construction using a high-level programming language. Topics covered include: fundamental programming concepts, the C programming language, programming style, program design and organisation, program testing and debugging. Practical experience of these topics is supplied through laboratory exercises and programming assignments.', 4);
 	appendCourse('COMP9337', 'Securing Wireless Networks', 'Faculty of Engineering', 'School of Computer Science', 'PGRD',
 		1, 'Kensington', 5, 'With exponential growth of the internet, security of a network has become increasingly challenging. This subject will explore the security vulnerabilities in both fixed and wireless networks and cover the fundamental concepts and advanced issues with an emphasis on the internet architecture and protocols.', 3);
-	/*
+
+
+    // Review form
+        var course_list = document.getElementsByClassName("course_summary");
+    
+    for(var k = 0; k<course_list.length;k++){
+        var tog_rev = document.createElement('button');
+        tog_rev.type = 'submit';
+        tog_rev.href =  "#reviewDiv"+k.toString();
+        tog_rev.setAttribute('data-toggle','collapse');
+        tog_rev.setAttribute('data-target', '#reviewDiv'+k.toString());
+        tog_rev.textContent = "Review";
+        tog_rev.setAttribute('class', "btn btn-info btn-lg");
+        var node = course_list[k];
+        node.insertBefore(tog_rev,node.childNodes[2]); 
+        node.insertBefore(reviewForm(k),node.childNodes[2]);
+
+
+    }
+   	/*
 	appendCourse('COMP2521: Data Structures and Algorithms', 'The goal of this course is to deepen students\' understanding of data structures and algorithms and how these can be employed effectively in the design of software systems.', 2);
 	appendCourse('COMP1521: Computer Systems Fundamentals', 'This course provides a programmer\'s view on how a computer system executes programs, manipulates data and communicates.', 4);
 	appendCourse('COMP1531: Software Engineering Fundamentals', 'This course provides an introduction to software engineering principles: basic software lifecycle concepts, modern development methodologies, conceptual modeling and how these activities relate to programming.', 4);
