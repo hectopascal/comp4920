@@ -132,7 +132,7 @@ function appendCourse(c_code, c_title, c_faculty, c_school, c_study_level,
 function reviewForm(k,c_code)
 {
     var div = document.createElement('div');
-    div.setAttribute('class', "toggle collapse");
+    div.setAttribute('class', "toggle collapse accordion-group");
     div.id    = "reviewDiv"+k.toString();
    
 
@@ -204,30 +204,6 @@ function reviewForm(k,c_code)
     return div;
 
 }
-/*
-function addEventListener(){
-    review_toggle=getElementsByClassName("toggle")
-    for(int i = 0; i<review_toggle.length;i++){
-	    review_toggle[i].addEventListener('click', function()
-		{
-			this.classList.toggle('active');
-
-			if(this.getAttribute('toggled') === 'y')
-			{
-
-				this.setAttribute('toggled', 'n');
-				this.children[0].setAttribute('class', 'fas fa-chevron-down');
-			}
-			else
-			{
-				this.setAttribute('toggled', 'y');
-				this.children[0].setAttribute('class', 'fas fa-chevron-up');
-			}
-		});
-
-    }
-}
-*/
 
 function main()
 {
@@ -245,6 +221,7 @@ function main()
         tog_rev.type = 'submit';
         tog_rev.setAttribute('data-toggle','collapse');
         tog_rev.setAttribute('data-target', '#reviewDiv'+k.toString());
+        tog_rev.setAttribute('data-parent','.toggle');
         tog_rev.textContent = "Review";
         tog_rev.setAttribute('class',  "tog_rev btn btn-info btn-lg");
         var node = course_list[k];
@@ -263,15 +240,11 @@ function main()
 }
 
 document.addEventListener("DOMContentLoaded", main);
-/*window.addEventListener("load",function(){
-    buttonlist()
-});*/
 $(document).ready(function(){
 
     $('.tog_rev').click( function(e) {
-
-        $('.toggle').not($(this)).collapse('hide');
-//        $('.toggle').not($(this)).children[0].collapse('hide');
+        $('.toggle').not($(this)).collapse('hide');      
+        $('.toggle').not($(this)).children[0].collapse('hide');
     });
 
     $("#submit_"+activeReview ).click(function(e) {
@@ -281,7 +254,7 @@ $(document).ready(function(){
             async: false,
             type: 'POST',
             dataType: 'json',
-            contentType: 'application/json',
+            contentType: 'application/json; charset=UTF-8',
             data: //JSON.stringify({'name':'yannnnie'}),
                 $('#reviewform_'+activeReview).serialize(),
             success: function(response) {

@@ -5,6 +5,7 @@ import random,json
 import psycopg2
 from flask import Flask, render_template, request, redirect, Response
 import sys
+import urllib2
 app = Flask(__name__)
 #sys.stderr = sys.stdout
 
@@ -27,13 +28,14 @@ def submit_form():
     for item in request.form:
         print(request.form[item],file=sys.stderr)
     name, rating, review = request.data.split("&",2)
-    value,user = name.split('=',1)
+    value,name = name.split('=',1)
+    user = urllib2.unquote(name)
     value,rating = rating.split('=',1)
     value,review = review.split('=',1)
+    review = urllib2.unquote(review)
     offering = 5
-    user = 3
     """ insert a new review """
-    sql = """INSERT INTO reviews(id,offering,rating,feedback)
+    sql = """INSERT INTO reviews(offering,rating,feedback,author)
              VALUES(%s,%s,%s,%s) RETURNING feedback;"""
     conn = None
     vendor_id = None
@@ -42,12 +44,12 @@ def submit_form():
         # connect to the PostgreSQL database
         conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com", 
                            database = "cs4920", 
-                           user = "yan", 
-                           password = "yan")
+                           user = "gill", 
+                           password = "gill")
         # create a new cursor
         cur = conn.cursor()
         # execute the INSERT statement
-        cur.execute(sql, (user,offering,rating,review))
+        cur.execute(sql, (offering,rating,review,user))
         # get the generated id back
         vendor_id = cur.fetchone()[0]
         # commit the changes to the database
