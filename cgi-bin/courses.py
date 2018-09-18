@@ -23,15 +23,14 @@ def json_courses():
 
 @app.route('/submit', methods=['GET','POST'] )
 def submit_form():
-   # print(request.form.get('review',None))
-
-    #print(request.form.get('rating',None))
-    #print(request.args)
-    #print("blearhg",file=sys.stderr)
-    #print(request.headers,file=sys.stderr)
+    print("blearhg",file=sys.stderr)
+    for item in request.form:
+        print(request.form[item],file=sys.stderr)
+    name, rating, review = request.data.split("&",2)
+    value,user = name.split('=',1)
+    value,rating = rating.split('=',1)
+    value,review = review.split('=',1)
     offering = 5
-    review = 'i hate this course so much'
-    rating = 5
     user = 3
     """ insert a new review """
     sql = """INSERT INTO reviews(id,offering,rating,feedback)
@@ -65,7 +64,7 @@ def submit_form():
     finally:
         if conn is not None:
             conn.close()
-    return json.dumps({"name":"thing"} )
+    return  json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 
 if __name__ == '__main__':
    app.run()

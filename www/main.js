@@ -274,15 +274,16 @@ $(document).ready(function(){
 //        $('.toggle').not($(this)).children[0].collapse('hide');
     });
 
-    $( "input#submit_"+activeReview ).click(function(e) {
+    $("#submit_"+activeReview ).click(function(e) {
+        console.log("hello");
         $.ajax({
-            url: "/cgi-bin/index.cgi/submit",
+            url: '/cgi-bin/index.cgi/submit',
             async: false,
             type: 'POST',
             dataType: 'json',
-            contentType: 'application/json; charset=utf-8',
+            contentType: 'application/json',
             data: //JSON.stringify({'name':'yannnnie'}),
-                $('#reviewForm_'+activeReview).serialize(),
+                $('#reviewform_'+activeReview).serialize(),
             success: function(response) {
                 console.log(response);
             },
