@@ -1,3 +1,4 @@
+var activeReview = 'COMP1911';
 
 function appendRating(rating)
 {
@@ -124,43 +125,46 @@ function appendCourse(c_code, c_title, c_faculty, c_school, c_study_level,
 
 	celem.setAttribute("class", 'p-3 bg-white course_summary');
 	celem.setAttribute("style", 'margin-top:20px;margin-bottom:20px; box-shadow:0 0 4px 0 rgba(0,0,0,0.2); border-radius:10px;');
-
+    celem.setAttribute("id",c_code);
 	document.getElementById('main_body').appendChild(celem);
 }
 
-function reviewForm(k)
+function reviewForm(k,c_code)
 {
     var div = document.createElement('div');
-    div.setAttribute('class', "collapse");
+    div.setAttribute('class', "toggle collapse");
     div.id    = "reviewDiv"+k.toString();
    
-   
+
     var f = document.createElement("form");
     f.setAttribute('method',"post");
-    f.setAttribute('action',"form.js");
-    f.id = "reviewform";
+    f.setAttribute("accept-charset","utf-8");
+    //f.setAttribute('action',"/cgi-bin/index.cgi/submit");
 
-    //create input element
+    f.id = "reviewform_"+c_code;
+
+    //----USER DISPLAY NAME----//
     var i = document.createElement("input");
     i.type = "text";
     i.class = "control-label-col-sm-2";
-    i.name = "name_box";
-    i.id = "nBox";
+    i.name = "dispname";
+    i.id = "nBox_"+c_code;
     i.placeholder = "Display Name";
 
+    //----REVIEW TEXT SPACE ----//
     var review = document.createElement("textarea");
     review.cols = "50";
     review.rows = "4";
     review.type = "textarea";
-    review.name = "review_box";
-    review.id = "rBox";
+    review.name = "review";
+    review.id = "rBox_"+c_code;
     review.placeholder = "Write your review here...";
 
     //create a rating dropdown //
     // TODO (to beautify to stars later)
     var r = document.createElement("SELECT");
-    r.id = "rating_box";
-    r.name = "rBox";
+    r.id = "rList_"+c_code;
+    r.name = "rating";
     for (var k = 1; k<=5; k++){
         var z = document.createElement("option");
         var val = k.toString();
@@ -174,7 +178,9 @@ function reviewForm(k)
     var s = document.createElement("input");
     s.type = "submit";
     s.value = "Submit";
-   
+    s.setAttribute('class','submitReview');
+    
+    s.id = "submit_"+c_code;
     // add all elements to the form
     var p = document.createElement('p');
     f.appendChild(p);
@@ -198,6 +204,30 @@ function reviewForm(k)
     return div;
 
 }
+/*
+function addEventListener(){
+    review_toggle=getElementsByClassName("toggle")
+    for(int i = 0; i<review_toggle.length;i++){
+	    review_toggle[i].addEventListener('click', function()
+		{
+			this.classList.toggle('active');
+
+			if(this.getAttribute('toggled') === 'y')
+			{
+
+				this.setAttribute('toggled', 'n');
+				this.children[0].setAttribute('class', 'fas fa-chevron-down');
+			}
+			else
+			{
+				this.setAttribute('toggled', 'y');
+				this.children[0].setAttribute('class', 'fas fa-chevron-up');
+			}
+		});
+
+    }
+}
+*/
 
 function main()
 {
@@ -208,21 +238,18 @@ function main()
 
 
     // Review form
-        var course_list = document.getElementsByClassName("course_summary");
+    var course_list = document.getElementsByClassName("course_summary");
     
     for(var k = 0; k<course_list.length;k++){
         var tog_rev = document.createElement('button');
         tog_rev.type = 'submit';
-        tog_rev.href =  "#reviewDiv"+k.toString();
         tog_rev.setAttribute('data-toggle','collapse');
         tog_rev.setAttribute('data-target', '#reviewDiv'+k.toString());
         tog_rev.textContent = "Review";
-        tog_rev.setAttribute('class', "btn btn-info btn-lg");
+        tog_rev.setAttribute('class',  "tog_rev btn btn-info btn-lg");
         var node = course_list[k];
+        node.insertBefore(reviewForm(k,node.id),node.childNodes[2]);
         node.insertBefore(tog_rev,node.childNodes[2]); 
-        node.insertBefore(reviewForm(k),node.childNodes[2]);
-
-
     }
    	/*
 	appendCourse('COMP2521: Data Structures and Algorithms', 'The goal of this course is to deepen students\' understanding of data structures and algorithms and how these can be employed effectively in the design of software systems.', 2);
@@ -236,3 +263,35 @@ function main()
 }
 
 document.addEventListener("DOMContentLoaded", main);
+/*window.addEventListener("load",function(){
+    buttonlist()
+});*/
+$(document).ready(function(){
+
+    $('.tog_rev').click( function(e) {
+
+        $('.toggle').not($(this)).collapse('hide');
+//        $('.toggle').not($(this)).children[0].collapse('hide');
+    });
+
+    $( "input#submit_"+activeReview ).click(function(e) {
+        $.ajax({
+            url: "/cgi-bin/index.cgi/submit",
+            async: false,
+            type: 'POST',
+            dataType: 'json',
+            contentType: 'application/json; charset=utf-8',
+            data: //JSON.stringify({'name':'yannnnie'}),
+                $('#reviewForm_'+activeReview).serialize(),
+            success: function(response) {
+                console.log(response);
+            },
+            error: function(result,ts,err) {
+                console.log([result,ts,err]);
+            }
+        });
+
+    });
+
+
+});
