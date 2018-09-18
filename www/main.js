@@ -133,16 +133,23 @@ function reviewForm(k,c_code)
 {
     var div = document.createElement('div');
     div.setAttribute('class', "toggle collapse accordion-group");
+    div.setAttribute('data-parent','#main_body');
     div.id    = "reviewDiv"+k.toString();
    
 
     var f = document.createElement("form");
+    f.setAttribute('class','courseform');
     f.setAttribute('method',"post");
     f.setAttribute("accept-charset","utf-8");
     //f.setAttribute('action',"/cgi-bin/index.cgi/submit");
 
     f.id = "reviewform_"+c_code;
-
+    //----COURSE IDENTIFIER----//
+    var c = document.createElement("input");
+    c.type = "hidden";
+    c.name = "course";
+    c.value = c_code;
+    
     //----USER DISPLAY NAME----//
     var i = document.createElement("input");
     i.type = "text";
@@ -181,7 +188,9 @@ function reviewForm(k,c_code)
     s.setAttribute('class','submitReview');
     
     s.id = "submit_"+c_code;
+    s.setAttribute("course",c_code);
     // add all elements to the form
+    f.appendChild(c);
     var p = document.createElement('p');
     f.appendChild(p);
 
@@ -221,7 +230,6 @@ function main()
         tog_rev.type = 'submit';
         tog_rev.setAttribute('data-toggle','collapse');
         tog_rev.setAttribute('data-target', '#reviewDiv'+k.toString());
-        tog_rev.setAttribute('data-parent','.toggle');
         tog_rev.textContent = "Review";
         tog_rev.setAttribute('class',  "tog_rev btn btn-info btn-lg");
         var node = course_list[k];
@@ -242,13 +250,11 @@ function main()
 document.addEventListener("DOMContentLoaded", main);
 $(document).ready(function(){
 
-    $('.tog_rev').click( function(e) {
-        $('.toggle').not($(this)).collapse('hide');      
-        $('.toggle').not($(this)).children[0].collapse('hide');
-    });
-
-    $("#submit_"+activeReview ).click(function(e) {
+    $(".submitReview" ).click(function(e) {
+        
         console.log("hello");
+        console.log($(this).attr("course"));
+        c_code = $(this).attr("course"); 
         $.ajax({
             url: '/cgi-bin/index.cgi/submit',
             async: false,
@@ -256,7 +262,7 @@ $(document).ready(function(){
             dataType: 'json',
             contentType: 'application/json; charset=UTF-8',
             data: //JSON.stringify({'name':'yannnnie'}),
-                $('#reviewform_'+activeReview).serialize(),
+                $('#reviewform_'+c_code).serialize(),
             success: function(response) {
                 console.log(response);
             },

@@ -24,16 +24,20 @@ def json_courses():
 
 @app.route('/submit', methods=['GET','POST'] )
 def submit_form():
-    print("blearhg",file=sys.stderr)
-    for item in request.form:
-        print(request.form[item],file=sys.stderr)
-    name, rating, review = request.data.split("&",2)
-    value,name = name.split('=',1)
-    user = urllib2.unquote(name)
-    value,rating = rating.split('=',1)
-    value,review = review.split('=',1)
-    review = urllib2.unquote(review)
-    offering = 5
+    print(request.data,file=sys.stderr)
+    course, name, rating, review = request.data.split("&",3)
+    
+    value,course    = name.split('=',1)
+    offering        = 5 #temporary value until all the offering/course information is in the database
+    print(course,file=sys.stderr)
+    value,name      = name.split('=',1)
+    user            = urllib2.unquote(name)
+
+    value,rating    = rating.split('=',1)
+    
+    value,review    = review.split('=',1)
+    review          = urllib2.unquote(review)
+    
     """ insert a new review """
     sql = """INSERT INTO reviews(offering,rating,feedback,author)
              VALUES(%s,%s,%s,%s) RETURNING feedback;"""
