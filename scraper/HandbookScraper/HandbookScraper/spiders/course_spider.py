@@ -34,8 +34,10 @@ class CourseSpider(scrapy.Spider):
             # code = int(code)
             name = item['name']
             description = item['description']
-            description = re.sub(r'(</.+>\n*<.+>)', "", description)
-            description = re.sub(r'</*p>', "", description)
+            description = re.sub(r'(</[p(br)(strong)u(li)(ul)]+>\s*<[p(br)(strong)u(li)(ul)]>)', "", description)
+            description = re.sub(r'(:+\s*<[p(br)(strong)u(li)(ul)]+>)', "", description)
+            description = re.sub(r'</*[pu(li)]>', "", description)
+            description = re.sub(r'</*[(ul)(br)] */*>', " ", description)
 
 
 
