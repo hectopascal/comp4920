@@ -22,6 +22,47 @@ def json_courses():
    records = cur.fetchall()
    return json.dumps(records)
 
+@app.route('/search', methods=['GET','POST'] )
+def search_course():
+    #print(request.data,file=sys.stderr)
+    
+    #value,search_term    = name.split('=',1)
+    search_term = 'software'
+    """ insert a new review """
+    sql = """SELECT * FROM courses WHERE (LOWER(code) LIKE LOWER('%%'|| %s || '%%'))
+            or (LOWER(name) LIKE LOWER('%%' || %s || '%%'));"""
+    conn = None
+    vendor_id = None
+    try:
+        # read database configuration
+        # connect to the PostgreSQL database
+        conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com", 
+                           database = "cs4920", 
+                           user = "gill", 
+                           password = "gill")
+        # create a new cursor
+        cur = conn.cursor()
+        # execute the INSERT statement
+        cur.execute(sql, (search_term, search_term))
+        # get the generated id back
+        records = cur.fetchall()
+        # commit the changes to the database
+        conn.commit()
+        #cur.execute("SELECT * from reviews")
+        #records = cur.fetchall()
+        # close communication with the database
+        cur.close()
+        #if conn is not None:
+        #    conn.close()
+        #return json.dumps(records)
+        if conn is not None: 
+            conn.close()
+        return json.dumps(records)
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error,file=sys.stderr)
+        if conn is not None:
+            conn.close()
+    return ""
 @app.route('/submit', methods=['GET','POST'] )
 def submit_form():
     print(request.data,file=sys.stderr)

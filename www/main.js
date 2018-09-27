@@ -128,11 +128,29 @@ function appendCourse(c_code, c_title, c_faculty, c_school, c_study_level,
     celem.setAttribute("id",c_code);
 	document.getElementById('main_body').appendChild(celem);
 }
+function display_search(results){
+    
+    var main = document.getElementById('main_body');
+    while(main.firstChild){
+        main.removeChild(main.firstChild);
+    }
+
+    if(results !== ""){
+        //console.log(results);
+        //var courses = JSON.parse(results);
+        for (var i = 0 ; i < results.length; i++){
+            appendCourse(results[i][1], results[i][2], "Faculty of Engineering", "School of Computer Science", "UGRD", 1 , 'Kensington', 6, results[i][3], 3);
+        }
+        addReviewSection();
+    } else {
+        //do nothing
+    }
+}
 
 function reviewForm(k,c_code)
 {
     var div = document.createElement('div');
-    div.setAttribute('class', "toggle collapse accordion-group");
+    div.setAttribute('class', "form-group toggle collapse accordion-group");
     div.setAttribute('data-parent','#main_body');
     div.id    = "reviewDiv"+k.toString();
    
@@ -149,11 +167,11 @@ function reviewForm(k,c_code)
     c.type = "hidden";
     c.name = "course";
     c.value = c_code;
-    
+    c.class = "form-control"
     //----USER DISPLAY NAME----//
     var i = document.createElement("input");
     i.type = "text";
-    i.class = "control-label-col-sm-2";
+    i.class = "control-label-col-sm-2 form-control";
     i.name = "dispname";
     i.id = "nBox_"+c_code;
     i.placeholder = "Display Name";
@@ -162,6 +180,7 @@ function reviewForm(k,c_code)
     var review = document.createElement("textarea");
     review.cols = "50";
     review.rows = "4";
+    review.class = "form-control";
     review.type = "textarea";
     review.name = "review";
     review.id = "rBox_"+c_code;
@@ -213,14 +232,7 @@ function reviewForm(k,c_code)
     return div;
 
 }
-
-function main()
-{
-	appendCourse('COMP1911', 'Computing 1A', 'Faculty of Engineering', 'School of Computer Science', 'UGRD',
-		1, 'Kensington', 6, 'This course introduces students to the basics of programming. The objective of this course is for students to develop proficiency in program design and construction using a high-level programming language. Topics covered include: fundamental programming concepts, the C programming language, programming style, program design and organisation, program testing and debugging. Practical experience of these topics is supplied through laboratory exercises and programming assignments.', 4);
-	appendCourse('COMP9337', 'Securing Wireless Networks', 'Faculty of Engineering', 'School of Computer Science', 'PGRD',
-		1, 'Kensington', 5, 'With exponential growth of the internet, security of a network has become increasingly challenging. This subject will explore the security vulnerabilities in both fixed and wireless networks and cover the fundamental concepts and advanced issues with an emphasis on the internet architecture and protocols.', 3);
-
+function addReviewSection(){
 
     // Review form
     var course_list = document.getElementsByClassName("course_summary");
@@ -235,7 +247,45 @@ function main()
         var node = course_list[k];
         node.insertBefore(reviewForm(k,node.id),node.childNodes[2]);
         node.insertBefore(tog_rev,node.childNodes[2]); 
+    
+       
+    
     }
+
+
+    //append alerts
+    var alert_div = document.createElement('div');
+    alert_div.setAttribute('class', "alert alert-success");
+    alert_div.id = "review-success";
+    var close_alert = document.createElement('button');
+    close_alert.setAttribute("data-dismiss","alert");
+    close_alert.setAttribute("class","close");
+    
+    alert_div.appendChild(close_alert);
+	alert_div.appendChild(document.createTextNode("Review successfully submitted"));
+	document.getElementById('main_body').appendChild(alert_div);
+
+    alert_div = document.createElement('div');
+    alert_div.setAttribute('class', "alert alert-danger");
+    alert_div.id    = "review-failure";   
+    close_alert = document.createElement('button');
+    close_alert.setAttribute("data-dismiss","alert");
+    close_alert.setAttribute("class","close");
+
+	alert_div.appendChild(close_alert);
+    alert_div.appendChild(document.createTextNode("Review submission failed"));
+	document.getElementById('main_body').appendChild(alert_div);
+
+}
+function main()
+{
+	appendCourse('COMP1911', 'Computing 1A', 'Faculty of Engineering', 'School of Computer Science', 'UGRD',
+		1, 'Kensington', 6, 'This course introduces students to the basics of programming. The objective of this course is for students to develop proficiency in program design and construction using a high-level programming language. Topics covered include: fundamental programming concepts, the C programming language, programming style, program design and organisation, program testing and debugging. Practical experience of these topics is supplied through laboratory exercises and programming assignments.', 4);
+	appendCourse('COMP9337', 'Securing Wireless Networks', 'Faculty of Engineering', 'School of Computer Science', 'PGRD',
+		1, 'Kensington', 5, 'With exponential growth of the internet, security of a network has become increasingly challenging. This subject will explore the security vulnerabilities in both fixed and wireless networks and cover the fundamental concepts and advanced issues with an emphasis on the internet architecture and protocols.', 3);
+
+
+    addReviewSection();
    	/*
 	appendCourse('COMP2521: Data Structures and Algorithms', 'The goal of this course is to deepen students\' understanding of data structures and algorithms and how these can be employed effectively in the design of software systems.', 2);
 	appendCourse('COMP1521: Computer Systems Fundamentals', 'This course provides a programmer\'s view on how a computer system executes programs, manipulates data and communicates.', 4);
@@ -249,9 +299,31 @@ function main()
 
 document.addEventListener("DOMContentLoaded", main);
 $(document).ready(function(){
+    $('#review-success').hide();
+    $('#review-failure').hide();
+    $("#searchButton" ).click(function(e) {
+        e.preventDefault();
+        console.log("searched");
+        console.log($('#searchField').value);
+        $.ajax({
+            url: '/cgi-bin/index.cgi/search',
+            async: false,
+            type: 'GET',
+            dataType: 'json',
+            contentType: 'application/json; charset=UTF-8',
+            data:$('#searchField').serialize(),
+            success: function(response) {
+                console.log(response);
+				display_search(response);
+            }, error: function(result,ts,err) {
+                console.log([result,ts,err]);
+            }
+        });
+        
+    });
 
     $(".submitReview" ).click(function(e) {
-        
+        e.preventDefault();
         console.log("hello");
         console.log($(this).attr("course"));
         c_code = $(this).attr("course"); 
@@ -265,9 +337,22 @@ $(document).ready(function(){
                 $('#reviewform_'+c_code).serialize(),
             success: function(response) {
                 console.log(response);
+                console.log("review success");
+                $('#nBox_'+c_code).val('');
+                $('#rBox_'+c_code).val('');
+                $('#rList_'+c_code).val(1);
+				$("#review-success").fadeTo(2000, 500).slideUp(500, function(){
+                 	$("#review-success").slideUp(500);
+                });
+
             },
             error: function(result,ts,err) {
                 console.log([result,ts,err]);
+                console.log("review failure");
+                $("#success-failure").fadeTo(2000, 500).slideUp(500, function(){
+                 	$("#success-failure").slideUp(500);
+                });
+
             }
         });
 
