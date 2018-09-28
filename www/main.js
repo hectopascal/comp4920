@@ -1,5 +1,3 @@
-var activeReview = 'COMP1911';
-
 function appendRating(rating)
 {
 	var crating = document.createElement('span');
@@ -147,6 +145,80 @@ function display_search(results){
     }
 }
 
+function navbar(){
+	var navbar = document.createElement('nav');
+	navbar.class = "navbar navbar-expand-lg navbar-light bg-light";
+	
+	var title = document.createElement('anchor');
+	title.value = 'Comp Electives';
+
+    navbar.appendChild(title);
+  /*<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item active">
+        <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">Link</a>
+      </li>
+*/	
+	var dropdown 	= document.createElement('li');
+	dropdown.class 	= "nav-item dropdown";
+	navbar.appendChild(dropdown);
+	var filters 	= document.createElement('a');
+	filters.value 	= "Filter";
+	filters.class	= "nav-link dropdown-toggle" 
+	filters.href	= "#";
+	filters.id		= "navbarDropdown";
+	filters.role	= "button";
+	filters.setAttribute("data-toggle","dropdown");
+	filters.setAttribute("aria-haspopup","true");
+	filters.setAttribute("aria-expanded","false");
+
+    var dropdownmenu = document.createElement('div');
+    dropdownmenu.class="dropdown-menu" 
+    dropdownmenu.setAttribute("aria-labelledby","navbarDropdown");
+    filters.appendChild(dropdownmenu);
+    dropdown.append(filters);
+
+    var item    = document.createElement('a');
+    item.id     = "filter_comp";
+    item.class  ="dropdown-item";
+    item.value  = "COMP";
+    var seng    = document.createElement('a');
+    seng.id     = "filter_seng";
+    seng.class  ="dropdown-item";
+    seng.value  = "SENG";
+    var binf    = document.createElement('a');
+    binf.id     = "filter_binf";
+    binf.class  ="dropdown-item";
+    binf.value  = "BINF";
+    dropdownmenu.appendChild(item);
+    dropdownmenu.appendChild(seng);
+    dropdownmenu.appendChild(binf);
+    
+    var search = document.createElement('form');
+    search.class="form-inline my-2 my-lg-0";
+    navbar.appendChild(search);
+    var searchField     = document.createElement('input');
+    searchField.class   ="form-control mr-sm-2"; 
+    searchField.type    ="text"; 
+    searchField.id      = "searchField";
+    searchField.placeholder ="Search"; 
+    searchField.setAttribute("aria-label","Search");
+
+    var searchButton    = document.createElement("button");
+    searchButton.id     = "searchButton";
+    searchButton.class  ="btn btn-outline-success my-2 my-sm-0";
+    
+    search.appendChild(searchField);
+    search.appendChild(searchButton);
+    document.getElementById('main_body').append(navbar);
+}
 function reviewForm(k,c_code)
 {
     var div = document.createElement('div');
@@ -279,12 +351,12 @@ function addReviewSection(){
 }
 function main()
 {
-	appendCourse('COMP1911', 'Computing 1A', 'Faculty of Engineering', 'School of Computer Science', 'UGRD',
+    appendCourse('COMP1911', 'Computing 1A', 'Faculty of Engineering', 'School of Computer Science', 'UGRD',
 		1, 'Kensington', 6, 'This course introduces students to the basics of programming. The objective of this course is for students to develop proficiency in program design and construction using a high-level programming language. Topics covered include: fundamental programming concepts, the C programming language, programming style, program design and organisation, program testing and debugging. Practical experience of these topics is supplied through laboratory exercises and programming assignments.', 4);
 	appendCourse('COMP9337', 'Securing Wireless Networks', 'Faculty of Engineering', 'School of Computer Science', 'PGRD',
 		1, 'Kensington', 5, 'With exponential growth of the internet, security of a network has become increasingly challenging. This subject will explore the security vulnerabilities in both fixed and wireless networks and cover the fundamental concepts and advanced issues with an emphasis on the internet architecture and protocols.', 3);
 
-
+//    navbar();
     addReviewSection();
    	/*
 	appendCourse('COMP2521: Data Structures and Algorithms', 'The goal of this course is to deepen students\' understanding of data structures and algorithms and how these can be employed effectively in the design of software systems.', 2);
@@ -304,14 +376,14 @@ $(document).ready(function(){
     $("#searchButton" ).click(function(e) {
         e.preventDefault();
         console.log("searched");
-        console.log($('#searchField').value);
+        console.log($('#searchForm').serialize());
         $.ajax({
             url: '/cgi-bin/index.cgi/search',
             async: false,
-            type: 'GET',
+            type: 'POST',
             dataType: 'json',
             contentType: 'application/json; charset=UTF-8',
-            data:$('#searchField').serialize(),
+            data:$('#searchForm').serialize(),
             success: function(response) {
                 console.log(response);
 				display_search(response);

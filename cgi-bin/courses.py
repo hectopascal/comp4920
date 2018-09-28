@@ -24,10 +24,11 @@ def json_courses():
 
 @app.route('/search', methods=['GET','POST'] )
 def search_course():
-    #print(request.data,file=sys.stderr)
-    
-    #value,search_term    = name.split('=',1)
-    search_term = 'software'
+    print(request.form,file=sys.stderr)
+    print(request.values,file=sys.stderr)
+    print(request.args,file=sys.stderr)
+    #search_term = 'network'
+    value,search_term    = request.data.split('=',1)
     """ insert a new review """
     sql = """SELECT * FROM courses WHERE (LOWER(code) LIKE LOWER('%%'|| %s || '%%'))
             or (LOWER(name) LIKE LOWER('%%' || %s || '%%'));"""
@@ -52,9 +53,6 @@ def search_course():
         #records = cur.fetchall()
         # close communication with the database
         cur.close()
-        #if conn is not None:
-        #    conn.close()
-        #return json.dumps(records)
         if conn is not None: 
             conn.close()
         return json.dumps(records)
