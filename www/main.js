@@ -149,7 +149,6 @@ function display_search(results){
     }
 }
 
-<<<<<<< HEAD
 function display_reviews(c_code, results)
 {
 	var c_forum = document.getElementById(c_code);
@@ -160,9 +159,8 @@ function display_reviews(c_code, results)
 	}
 }
 
-function navbar()
-{
-=======
+//function navbar()
+//{
 function rate_reviews(){
     var header = document.getElementsByClassName('post-header');
     console.log(header.length);
@@ -178,7 +176,6 @@ function rate_reviews(){
 }
 
 function navbar(){
->>>>>>> a5e12dab4da2ae14e8adadbbde07155820afe516
 	var navbar = document.createElement('nav');
 	navbar.class = "navbar navbar-expand-lg navbar-light bg-light";
 	
