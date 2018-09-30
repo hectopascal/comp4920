@@ -22,8 +22,8 @@ function appendPost(user_title, rating, post)
 {
 	var cpost = document.createElement('div');
 	cpost.setAttribute('class', 'py-2 bg-light');
-	var cpost_title = document.createElement('div');
-	cpost_title.setAttribute('class', 'd-flex bg-dark text-white p-1 rounded');
+    var cpost_title = document.createElement('div');
+	cpost_title.setAttribute('class', 'post-header d-flex bg-dark text-white p-1 rounded');
 	cpost_title.appendChild(document.createTextNode(user_title + ' posted:'));
 	cpost.appendChild(cpost_title);
 
@@ -149,6 +149,7 @@ function display_search(results){
     }
 }
 
+<<<<<<< HEAD
 function display_reviews(c_code, results)
 {
 	var c_forum = document.getElementById(c_code);
@@ -161,6 +162,23 @@ function display_reviews(c_code, results)
 
 function navbar()
 {
+=======
+function rate_reviews(){
+    var header = document.getElementsByClassName('post-header');
+    console.log(header.length);
+    for(var i=0;i<header.length;i++){
+    	var up = document.createElement('i');
+        up.setAttribute("class","fas fa-arrow-up");
+	    var down = document.createElement('i');
+        down.setAttribute("class","fas fa-arrow-down");
+        header[i].appendChild(up);
+        header[i].appendChild(down);
+        
+    }
+}
+
+function navbar(){
+>>>>>>> a5e12dab4da2ae14e8adadbbde07155820afe516
 	var navbar = document.createElement('nav');
 	navbar.class = "navbar navbar-expand-lg navbar-light bg-light";
 	
@@ -373,6 +391,7 @@ function main()
 
 //    navbar();
     addReviewSection();
+    rate_reviews();
    	/*
 	appendCourse('COMP2521: Data Structures and Algorithms', 'The goal of this course is to deepen students\' understanding of data structures and algorithms and how these can be employed effectively in the design of software systems.', 2);
 	appendCourse('COMP1521: Computer Systems Fundamentals', 'This course provides a programmer\'s view on how a computer system executes programs, manipulates data and communicates.', 4);
@@ -439,7 +458,8 @@ $(document).ready(function(){
         e.preventDefault();
 		var username = document.getElementById("username").value;
 		var password = document.getElementById("password").value;
-        console.log("login attempt");
+        console.log("username: "+username);
+        console.log("password: "+password);
         $.ajax({
             url: '/cgi-bin/index.cgi/login',
             async: false,
