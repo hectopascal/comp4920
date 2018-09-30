@@ -75,6 +75,7 @@ function appendCourse(c_code, c_title, c_faculty, c_school, c_study_level,
 	var load_prompt = document.createElement('button');
 	var load_prompt_i = document.createElement('i');
 	load_prompt.setAttribute('type', 'submit');
+	load_prompt.setAttribute('id', 'showReviews');
 	load_prompt.setAttribute('class', 'btn btn-default');
 	load_prompt.setAttribute('data-toggle', 'collapse');
 	load_prompt.setAttribute('href', '#' + c_code + '_forum');
@@ -91,11 +92,13 @@ function appendCourse(c_code, c_title, c_faculty, c_school, c_study_level,
 	var ttt  = document.createTextNode('I did not enjoy this course.');
 	collapsing_forum.setAttribute('class', 'collapse');
 	collapsing_forum.setAttribute('id', c_code + '_forum');
+	/*
 	collapsing_forum.appendChild(appendPost('stupid', 4, 'hmmm... course not very good'));
 	collapsing_forum.appendChild(appendPost('idiot', 4, 'it\'s alright'));
 	collapsing_forum.appendChild(appendPost('user', 4, 'amazing course but quite difficult'));
 	collapsing_forum.appendChild(appendPost('user1', 4, 'horrible lecturer'));
 	collapsing_forum.appendChild(appendPost('user2', 4, 'hello'));
+	*/
 
 	load_prompt.addEventListener('click', function()
 		{
@@ -126,6 +129,7 @@ function appendCourse(c_code, c_title, c_faculty, c_school, c_study_level,
     celem.setAttribute("id",c_code);
 	document.getElementById('main_body').appendChild(celem);
 }
+
 function display_search(results){
     
     var main = document.getElementById('main_body');
@@ -145,7 +149,18 @@ function display_search(results){
     }
 }
 
-function navbar(){
+function display_reviews(c_code, results)
+{
+	var c_forum = document.getElementById(c_code);
+	c_forum.innerHTML = "";
+	for(var i = 0; i < results.length; i++)
+	{
+		c_forum.appendChild(appendPost(results[i][3], results[i][2], results[i][4]));
+	}
+}
+
+function navbar()
+{
 	var navbar = document.createElement('nav');
 	navbar.class = "navbar navbar-expand-lg navbar-light bg-light";
 	
@@ -377,6 +392,26 @@ $(document).ready(function(){
             return $('#popover-content').html();
         }
     });
+
+	$('#showReviews').click(function(e) {
+		e.preventDefault();
+        c_code = $(this).attr("aria-controls"); 
+		console.log('showing reviews for ' + c_code);
+		$.ajax({
+			url: '/cgi-bin/index.cgi/get_reviews',
+			async: false,
+			type: 'POST',
+			dataType: 'json',
+			contentType: 'application/json; charset=UTF-8',
+			data: c_code,
+			success: function(response) {
+				console.log(response);
+				display_reviews(c_code, response);
+			}, error: function(result,ts,err) {
+				console.log([result,ts,err]);
+			}
+		});
+	});
 
     $('#review-success').hide();
     $('#review-failure').hide();

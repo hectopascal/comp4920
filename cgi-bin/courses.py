@@ -9,6 +9,35 @@ import urllib2
 app = Flask(__name__)
 #sys.stderr = sys.stdout
 
+@app.route('/get_reviews', methods=['GET', 'POST'])
+def get_reviews():
+	sql = """SELECT * FROM reviews"""
+	conn = None
+	vendor_id = None
+	try:
+		conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com", 
+                           database = "cs4920", 
+                           user = "gill", 
+                           password = "gill")
+
+		cur = conn.cursor()
+		cur.execute(sql)
+
+		records = cur.fetchall()
+
+		conn.commit()
+
+		cur.close()
+		if conn is not None:
+			conn.close()
+		return json.dumps(records)
+
+	except (Exception, psycopg2.DatabaseError) as error:
+		print(error,file=sys.stderr)
+		if conn is not None:
+			conn.close()
+	return ""
+
 @app.route('/courses')
 def json_courses():
    conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com", 
@@ -61,6 +90,7 @@ def search_course():
         if conn is not None:
             conn.close()
     return ""
+
 @app.route('/submit', methods=['GET','POST'] )
 def submit_form():
     print(request.data,file=sys.stderr)
