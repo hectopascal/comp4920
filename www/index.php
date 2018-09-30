@@ -38,7 +38,7 @@
 </div>
 		
 		</nav>
-		<button data-placement="bottom" data-toggle="popover" data-title="" data-container="body" type="button" class="btn btn-light my-2 my-sm-0 mr-2" data-html="true" href="#" id="login">Login</button>
+<!--		<button data-placement="bottom" data-toggle="popover" data-title="" data-container="body" type="button" class="btn btn-light my-2 my-sm-0 mr-2" data-html="true" href="#" id="login">Login</button> -->
   	<div id="popover-content" class="hide">
     <form class="form-inline" role="form">
       <div class="form-group">
