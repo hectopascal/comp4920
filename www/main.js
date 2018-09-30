@@ -368,9 +368,16 @@ function main()
 	appendCourse('COMP3900: Computer Science Project', 'A capstone software project. Students work in teams to define, implement and evaluate a real-world software system.', 1);
 	*/
 }
-
 document.addEventListener("DOMContentLoaded", main);
 $(document).ready(function(){
+
+    $("[data-toggle=popover]").popover({
+        html: true, 
+        content: function() {
+            return $('#popover-content').html();
+        }
+    });
+
     $('#review-success').hide();
     $('#review-failure').hide();
     $("#searchButton" ).click(function(e) {
@@ -393,7 +400,28 @@ $(document).ready(function(){
         });
         
     });
-
+	$("#loginButton" ).click(function(e) {
+        e.preventDefault();
+		var username = document.getElementById("username").value;
+		var password = document.getElementById("password").value;
+        console.log("login attempt");
+        $.ajax({
+            url: '/cgi-bin/index.cgi/login',
+            async: false,
+            type: 'POST',
+            dataType: 'json',
+            contentType: 'application/json; charset=UTF-8',
+            data: {"user":username, "pass":password},
+            success: function(response) {
+				console.log("login success");
+				//login_success();
+            }, error: function(result,ts,err) {
+				console.log("login failed");
+                console.log([result,ts,err]);
+            }
+        });
+        
+    });
     $(".submitReview" ).click(function(e) {
         e.preventDefault();
         console.log("hello");

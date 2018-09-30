@@ -7,11 +7,10 @@
 		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
 		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins">
 		<!-- Bootrap JS & JQuery -->
-<script src="https://code.jquery.com/jquery-3.1.1.min.js">
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
 		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
         <script src="main.js"></script>
-        
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 	</head>
@@ -35,11 +34,21 @@
 				<form id="searchForm" class="form-inline my-2 my-lg-0" method="post" accept-charset="utf-8">
 					<input id="searchField" name="searchfield" class="form-control mr-sm-2" type="text" placeholder="Course name / code">
 					<button type="submit" id="searchButton" class="btn btn-light my-2 my-sm-0 mr-2">Search</button>
-					<button class="btn btn-light my-2 my-sm-0">Login</button>
 				</form>
-
-			</div>
+</div>
+		
 		</nav>
+		<button data-placement="bottom" data-toggle="popover" data-title="" data-container="body" type="button" class="btn btn-light my-2 my-sm-0 mr-2" data-html="true" href="#" id="login">Login</button>
+  	<div id="popover-content" class="hide">
+    <form class="form-inline" role="form">
+      <div class="form-group">
+        <input id="username" placeholder="Email" class="form-control" type="email">
+		<p>
+        <input id="password" placeholder="Password" class="form-control" minlength="6" type="password">
+        <button type="submit" class="btn btn-primary" id="loginButton">Login</button>
+      </div>
+    </form>
+  </div>
 		<main id="main_body" role="main" class="container">
         </main>
 	</body>
