@@ -495,7 +495,7 @@ $(document).ready(function(){
             type: 'POST',
             dataType: 'json',
             contentType: 'application/json; charset=UTF-8',
-            data: {"user":username, "pass":password},
+            data: JSON.stringify({"user":username, "pass":password}),
             success: function(response) {
 				console.log("login success");
 				//login_success();
