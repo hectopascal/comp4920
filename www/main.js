@@ -59,7 +59,8 @@ function appendCourse(c_code, c_title, c_faculty, c_school, c_study_level,
 	var cnode  = document.createElement('h4');
 	var cnode1 = document.createElement('p');
 	var title  = document.createTextNode(c_code + ': ' + c_title);
-	var info   = document.createTextNode(c_info);
+	var info   = document.createElement('div');
+    info.innerHTML = c_info;
 	cnode.appendChild(title);
 
 
@@ -92,13 +93,6 @@ function appendCourse(c_code, c_title, c_faculty, c_school, c_study_level,
 	var ttt  = document.createTextNode('I did not enjoy this course.');
 	collapsing_forum.setAttribute('class', 'collapse');
 	collapsing_forum.setAttribute('id', c_code + '_forum');
-	/*
-	collapsing_forum.appendChild(appendPost('stupid', 4, 'hmmm... course not very good'));
-	collapsing_forum.appendChild(appendPost('idiot', 4, 'it\'s alright'));
-	collapsing_forum.appendChild(appendPost('user', 4, 'amazing course but quite difficult'));
-	collapsing_forum.appendChild(appendPost('user1', 4, 'horrible lecturer'));
-	collapsing_forum.appendChild(appendPost('user2', 4, 'hello'));
-	*/
 
 	load_prompt.addEventListener('click', function()
 		{
@@ -130,7 +124,7 @@ function appendCourse(c_code, c_title, c_faculty, c_school, c_study_level,
 	document.getElementById('main_body').appendChild(celem);
 }
 
-function display_search(results){
+function display_courses(results){
     
     var main = document.getElementById('main_body');
     while(main.firstChild){
@@ -141,7 +135,9 @@ function display_search(results){
         //console.log(results);
         //var courses = JSON.parse(results);
         for (var i = 0 ; i < results.length; i++){
-            appendCourse(results[i][1], results[i][2], "Faculty of Engineering", "School of Computer Science", "UGRD", 1 , 'Kensington', 6, results[i][3], 3);
+		    var rating = getRating(results[i][1]);
+            console.log(results[i][3]);
+            appendCourse(results[i][1], results[i][2], "Faculty of Engineering", "School of Computer Science", "UGRD", 1 , 'Kensington', 6, results[i][3], rating);
         }
         addReviewSection();
         submitReviewListener();
@@ -149,7 +145,25 @@ function display_search(results){
         //do nothing
     }
 }
-
+function getRating(course){
+    var rating=0;
+    $.ajax({
+        url: '/cgi-bin/index.cgi/meanrating',
+        async: false,
+        type: 'POST',
+        dataType: 'json',
+        contentType: 'application/json; charset=UTF-8',
+        data: course,
+            success: function(response) {
+                console.log(response[0][0]);
+                rating = response[0][0];
+            },
+            error: function(result,ts,err) {
+                console.log([result,ts,err]);
+            }
+    });
+  return rating;
+}
 function display_reviews(c_code, results)
 {
 	var c_forum = document.getElementById(c_code + '_forum');
@@ -160,8 +174,6 @@ function display_reviews(c_code, results)
 	}
 }
 
-//function navbar()
-//{
 function rate_reviews(){
     var header = document.getElementsByClassName('post-header');
     console.log(header.length);
@@ -381,13 +393,19 @@ function addReviewSection(){
 }
 function main()
 {
-    appendCourse('COMP1911', 'Computing 1A', 'Faculty of Engineering', 'School of Computer Science', 'UGRD',
-		1, 'Kensington', 6, 'This course introduces students to the basics of programming. The objective of this course is for students to develop proficiency in program design and construction using a high-level programming language. Topics covered include: fundamental programming concepts, the C programming language, programming style, program design and organisation, program testing and debugging. Practical experience of these topics is supplied through laboratory exercises and programming assignments.', 4);
-	appendCourse('COMP9337', 'Securing Wireless Networks', 'Faculty of Engineering', 'School of Computer Science', 'PGRD',
-		1, 'Kensington', 5, 'With exponential growth of the internet, security of a network has become increasingly challenging. This subject will explore the security vulnerabilities in both fixed and wireless networks and cover the fundamental concepts and advanced issues with an emphasis on the internet architecture and protocols.', 3);
-
-//    navbar();
-    addReviewSection();
+	$.ajax({
+		url: '/cgi-bin/index.cgi/courses',
+		async: false,
+		type: 'POST',
+		dataType: 'json',
+		contentType: 'application/json; charset=UTF-8',
+		success: function(response) {
+			console.log(response);
+			display_courses(response);
+		}, error: function(result,ts,err) {
+			console.log([result,ts,err]);
+		}
+	});
     rate_reviews();
 }
 document.addEventListener("DOMContentLoaded", main);
@@ -476,13 +494,14 @@ $(document).ready(function(){
             data:$('#searchForm').serialize(),
             success: function(response) {
                 console.log(response);
-				display_search(response);
+				display_courses(response);
             }, error: function(result,ts,err) {
                 console.log([result,ts,err]);
             }
         });
         
     });
+
 	$("#loginButton" ).click(function(e) {
         e.preventDefault();
 		var username = document.getElementById("username").value;
@@ -506,5 +525,4 @@ $(document).ready(function(){
         });
         
     });
-    submitReviewListener();
 });

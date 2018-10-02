@@ -9,6 +9,36 @@ import urllib2
 app = Flask(__name__)
 #sys.stderr = sys.stdout
 
+
+@app.route('/meanrating', methods=['GET', 'POST'])
+def get_mean_rating():
+	sql = """SELECT mean_rating FROM courses WHERE code='%s'"""
+	conn = None
+	vendor_id = None
+	try:
+            conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com", 
+                       database = "cs4920", 
+                       user = "gill", 
+                       password = "gill")
+
+            cur = conn.cursor()
+            cur.execute(sql % request.data)
+
+            records = cur.fetchall()
+            conn.commit()
+
+            cur.close()
+            if conn is not None:
+                    conn.close()
+            return json.dumps(records);
+
+	except (Exception, psycopg2.DatabaseError) as error:
+		print(error,file=sys.stderr)
+		if conn is not None:
+			conn.close()
+	return ""
+
+
 @app.route('/get_reviews', methods=['GET', 'POST'])
 def get_reviews():
 	sql = """SELECT * FROM reviews WHERE course='%s'"""
@@ -38,7 +68,7 @@ def get_reviews():
 			conn.close()
 	return ""
 
-@app.route('/courses')
+@app.route('/courses', methods=['POST'])
 def json_courses():
    conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com", 
                            database = "cs4920", 
@@ -46,7 +76,7 @@ def json_courses():
                            password = "kelvin")
    
    cur = conn.cursor()
-   cur.execute("SELECT * FROM courses;")
+   cur.execute("SELECT * FROM courses limit 15;")
    
    records = cur.fetchall()
    return json.dumps(records)
@@ -113,6 +143,9 @@ def submit_form():
              VALUES(%s,%s,%s,%s,%s) RETURNING feedback;"""
     conn = None
     vendor_id = None
+    
+    get_mean = """SELECT mean_rating,review_count FROM courses WHERE code='%s' """
+    set_mean = """UPDATE courses SET mean_rating=%s, review_count=%s WHERE code=%s"""
     try:
         # read database configuration
         # connect to the PostgreSQL database
@@ -120,21 +153,25 @@ def submit_form():
                            database = "cs4920", 
                            user = "gill", 
                            password = "gill")
-        # create a new cursor
         cur = conn.cursor()
-        # execute the INSERT statement
         cur.execute(sql, (rating,review,user,score,course))
-        # get the generated id back
         vendor_id = cur.fetchone()[0]
-        # commit the changes to the database
+
+
         conn.commit()
-        #cur.execute("SELECT * from reviews")
-        #records = cur.fetchall()
-        # close communication with the database
+        #update average rating
+        print("before executed get mean",file=sys.stderr)
+        result = cur.execute(get_mean % course)
+        print("executed get mean",file=sys.stderr)
+        meta = cur.fetchall()
+        print(meta[0],file=sys.stderr)
+        mean = float(meta[0][0])
+        count = int(meta[0][1])
+        count = count+1
+        mean = (mean + float(count-1)*float(rating))/float(count)
+        cur.execute(set_mean,(mean,int(count),course))
+        conn.commit()
         cur.close()
-        #if conn is not None:
-        #    conn.close()
-        #return json.dumps(records)
     except (Exception, psycopg2.DatabaseError) as error:
         print(error,file=sys.stderr)
     finally:
