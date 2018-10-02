@@ -2,6 +2,9 @@ import scrapy
 import json
 import psycopg2
 import re
+from lxml import html
+from lxml.html.clean import clean_html
+
 
 # class scrapy.http.Request(url[, callback, method='GET', headers, body, cookies, meta, encoding='utf-8', priority=0, dont_filter=False, errback, flags]):
 #
@@ -12,7 +15,7 @@ class CourseSpider(scrapy.Spider):
     #     'https://www.handbook.unsw.edu.au/undergraduate/courses/2019/ACCT1501/?q=&ct=all'
     # ]
     def start_requests(self):
-        form_data = { "track_scores":True,"_source":{"includes":["*.code","*.name","*.award_titles","*.keywords","*.active","urlmap","contenttype"],"excludes":["",None,None]},"query":{"filtered":{"query":{"bool":{"must":[{"bool":{"minimum_should_match":"100%","should":[{"query_string":{"fields":["*owning_org*"],"query":"*1a3a1d4f4f4d97404aa6eb4f0310c780*"}}]}},{"query_string":{"fields":["*.active"],"query":"*1*"}}]}},"filter":{"bool":{"should":[{"term":{"contenttype":"subject"}}],"must_not":[{"missing":{"field":"*.name"}}]}}}},"from":0,"size":20,"sort":[{"subject.code":"asc"}] }
+        form_data = { "track_scores":True,"_source":{"includes":["*.code","*.name","*.award_titles","*.keywords","*.active","urlmap","contenttype"],"excludes":["",None,None]},"query":{"filtered":{"query":{"bool":{"must":[{"bool":{"minimum_should_match":"100%","should":[{"query_string":{"fields":["*owning_org*"],"query":"*1a3a1d4f4f4d97404aa6eb4f0310c780*"}}]}},{"query_string":{"fields":["*.active"],"query":"*1*"}}]}},"filter":{"bool":{"should":[{"term":{"contenttype":"subject"}}],"must_not":[{"missing":{"field":"*.name"}}]}}}},"from":0,"size":120,"sort":[{"subject.code":"asc"}] }
         request_body = json.dumps(form_data)
         yield scrapy.Request('https://www.handbook.unsw.edu.au/api/es/search',
                                 callback=self.parse,
@@ -30,23 +33,36 @@ class CourseSpider(scrapy.Spider):
 
         my_data = []
         for item in data["contentlets"]:
-            code = item['code']
-            # code = int(code)
-            name = item['name']
-            # try:
-            #     item["description"]
-            # except NameError:
-            #     continue
-            # else:
+            if 'code' not in item:
+                continue
+            else:
+                code = item['code']
+            if 'name' not in item:
+                continue
+            else:
+                name = item['name']
             if 'description' not in item:
                 continue
             else:
                 description = item["description"]
-                description = re.sub(r'(</[p(br)(strong)u(li)(ul)]+>\s*<[p(br)(strong)u(li)(ul)]>)', "", description)
-                description = re.sub(r'(:+\s*<[p(br)(strong)u(li)(ul)]+>)', "", description)
-                description = re.sub(r'</*[pu(li)]>', "", description)
-                # # description = re.sub(r'<\n>', '====', description)
-                description = re.sub(r'</*[(ul)(br)] */*>', " ", description)
+                # description_data.strip();
+                # description_html = etree.HTML(description_data)
+                # description = etree.tostring(description_html, pretty_print=False, method="html")
+                description.strip();
+                description = clean_html(description)
+
+                # temp = html.fragments_fromstring(description)
+                # description = html.tostring(temp)
+
+                # description = re.sub(r'(</[p(br)(strong)u(li)(ul)]+>\s*<[p(br)(strong)u(li)(ul)]>)', "", description)
+                # description = re.sub(r'(:+\s*<[p(br)(strong)u(li)(ul)]+>)', "", description)
+                # description = re.sub(r'</*[pu(li)]>', "", description)
+                # # # description = re.sub(r'<\n>', '====', description)
+                # description = re.sub(r'</*[(ul)(br)] */*>', " ", description)
+                # description.strip();
+                # description = re.sub(r'<ul><li>', "", description)
+                # description = re-sub(r')
+                # # description = re.sub(r'(</*[p>))
 
             my_data.append([code, name, description])
 
