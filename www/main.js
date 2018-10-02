@@ -136,7 +136,6 @@ function display_courses(results){
         //var courses = JSON.parse(results);
         for (var i = 0 ; i < results.length; i++){
 		    var rating = getRating(results[i][1]);
-            console.log(results[i][3]);
             appendCourse(results[i][1], results[i][2], "Faculty of Engineering", "School of Computer Science", "UGRD", 1 , 'Kensington', 6, results[i][3], rating);
         }
         addReviewSection();
@@ -155,7 +154,6 @@ function getRating(course){
         contentType: 'application/json; charset=UTF-8',
         data: course,
             success: function(response) {
-                console.log(response[0][0]);
                 rating = response[0][0];
             },
             error: function(result,ts,err) {
@@ -186,81 +184,6 @@ function rate_reviews(){
         header[i].appendChild(down);
         
     }
-}
-
-function navbar(){
-	var navbar = document.createElement('nav');
-	navbar.class = "navbar navbar-expand-lg navbar-light bg-light";
-	
-	var title = document.createElement('anchor');
-	title.value = 'Comp Electives';
-
-    navbar.appendChild(title);
-  /*<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-  </button>
-
-  <div class="collapse navbar-collapse" id="navbarSupportedContent">
-    <ul class="navbar-nav mr-auto">
-      <li class="nav-item active">
-        <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="#">Link</a>
-      </li>
-*/	
-	var dropdown 	= document.createElement('li');
-	dropdown.class 	= "nav-item dropdown";
-	navbar.appendChild(dropdown);
-	var filters 	= document.createElement('a');
-	filters.value 	= "Filter";
-	filters.class	= "nav-link dropdown-toggle" 
-	filters.href	= "#";
-	filters.id		= "navbarDropdown";
-	filters.role	= "button";
-	filters.setAttribute("data-toggle","dropdown");
-	filters.setAttribute("aria-haspopup","true");
-	filters.setAttribute("aria-expanded","false");
-
-    var dropdownmenu = document.createElement('div');
-    dropdownmenu.class="dropdown-menu" 
-    dropdownmenu.setAttribute("aria-labelledby","navbarDropdown");
-    filters.appendChild(dropdownmenu);
-    dropdown.append(filters);
-
-    var item    = document.createElement('a');
-    item.id     = "filter_comp";
-    item.class  ="dropdown-item";
-    item.value  = "COMP";
-    var seng    = document.createElement('a');
-    seng.id     = "filter_seng";
-    seng.class  ="dropdown-item";
-    seng.value  = "SENG";
-    var binf    = document.createElement('a');
-    binf.id     = "filter_binf";
-    binf.class  ="dropdown-item";
-    binf.value  = "BINF";
-    dropdownmenu.appendChild(item);
-    dropdownmenu.appendChild(seng);
-    dropdownmenu.appendChild(binf);
-    
-    var search = document.createElement('form');
-    search.class="form-inline my-2 my-lg-0";
-    navbar.appendChild(search);
-    var searchField     = document.createElement('input');
-    searchField.class   ="form-control mr-sm-2"; 
-    searchField.type    ="text"; 
-    searchField.id      = "searchField";
-    searchField.placeholder ="Search"; 
-    searchField.setAttribute("aria-label","Search");
-
-    var searchButton    = document.createElement("button");
-    searchButton.id     = "searchButton";
-    searchButton.class  ="btn btn-outline-success my-2 my-sm-0";
-    
-    search.appendChild(searchField);
-    search.appendChild(searchButton);
-    document.getElementById('main_body').append(navbar);
 }
 
 function reviewForm(k,c_code)
@@ -413,8 +336,6 @@ document.addEventListener("DOMContentLoaded", main);
 function submitReviewListener(){
     $(".submitReview" ).click(function(e) {
         e.preventDefault();
-        console.log("hello");
-        console.log($(this).attr("course"));
         c_code = $(this).attr("course"); 
         $.ajax({
             url: '/cgi-bin/index.cgi/submit',
@@ -496,6 +417,27 @@ $(document).ready(function(){
                 console.log(response);
 				display_courses(response);
             }, error: function(result,ts,err) {
+                console.log([result,ts,err]);
+            }
+        });
+        
+    });
+    $(".filter").click(function(e) {
+        e.preventDefault();
+        console.log("filtering");
+        var filter = $(this).attr('id');
+        $.ajax({
+            url: '/cgi-bin/index.cgi/filter',
+            async: false,
+            type: 'POST',
+            dataType: 'json',
+            contentType: 'application/json; charset=UTF-8',
+            data:"filter="+filter,
+            success: function(response) {
+                console.log(response);
+				display_courses(response);
+            }, error: function(result,ts,err) {
+                console.log(result);
                 console.log([result,ts,err]);
             }
         });

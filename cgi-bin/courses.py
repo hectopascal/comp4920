@@ -78,17 +78,43 @@ def json_courses():
                            password = "kelvin")
    
    cur = conn.cursor()
-   cur.execute("SELECT * FROM courses limit 15;")
+   cur.execute("SELECT * FROM courses limit 10;")
    
    records = cur.fetchall()
    return json.dumps(records)
 
+@app.route('/filter', methods=['POST'] )
+def filter_course():
+    value,search_term    = request.data.split('=',1)
+    """ insert a new review """
+    sql = """SELECT * FROM courses WHERE (LOWER(code) LIKE LOWER('%%'|| '%s' || '%%')) limit 10; """
+    conn = None
+    vendor_id = None
+    try:
+        conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com", 
+                           database = "cs4920", 
+                           user = "gill", 
+                           password = "gill")
+        cur = conn.cursor()
+        cur.execute(sql % search_term)
+        records = cur.fetchall()
+        conn.commit()
+        cur.close()
+        if conn is not None: 
+            conn.close()
+        return json.dumps(records)
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error,file=sys.stderr)
+        if conn is not None:
+            conn.close()
+    return ""
+
+
 @app.route('/search', methods=['GET','POST'] )
 def search_course():
-    print(request.form,file=sys.stderr)
-    print(request.values,file=sys.stderr)
-    print(request.args,file=sys.stderr)
-    #search_term = 'network'
+    #print(request.form,file=sys.stderr)
+    #print(request.values,file=sys.stderr)
+    #print(request.args,file=sys.stderr)
     value,search_term    = request.data.split('=',1)
     """ insert a new review """
     sql = """SELECT * FROM courses WHERE (LOWER(code) LIKE LOWER('%%'|| %s || '%%'))
