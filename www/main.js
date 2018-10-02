@@ -144,6 +144,7 @@ function display_search(results){
             appendCourse(results[i][1], results[i][2], "Faculty of Engineering", "School of Computer Science", "UGRD", 1 , 'Kensington', 6, results[i][3], 3);
         }
         addReviewSection();
+        submitReviewListener();
     } else {
         //do nothing
     }
@@ -249,6 +250,7 @@ function navbar(){
     search.appendChild(searchButton);
     document.getElementById('main_body').append(navbar);
 }
+
 function reviewForm(k,c_code)
 {
     var div = document.createElement('div');
@@ -348,9 +350,7 @@ function addReviewSection(){
         tog_rev.setAttribute('class',  "tog_rev btn btn-info btn-lg");
         var node = course_list[k];
         node.insertBefore(reviewForm(k,node.id),node.childNodes[2]);
-        node.insertBefore(tog_rev,node.childNodes[2]); 
-    
-       
+        node.insertBefore(tog_rev,node.childNodes[2]);        
     
     }
 
@@ -389,17 +389,49 @@ function main()
 //    navbar();
     addReviewSection();
     rate_reviews();
-   	/*
-	appendCourse('COMP2521: Data Structures and Algorithms', 'The goal of this course is to deepen students\' understanding of data structures and algorithms and how these can be employed effectively in the design of software systems.', 2);
-	appendCourse('COMP1521: Computer Systems Fundamentals', 'This course provides a programmer\'s view on how a computer system executes programs, manipulates data and communicates.', 4);
-	appendCourse('COMP1531: Software Engineering Fundamentals', 'This course provides an introduction to software engineering principles: basic software lifecycle concepts, modern development methodologies, conceptual modeling and how these activities relate to programming.', 4);
-	appendCourse('COMP3121: Algorithms and Programming Techniques', 'Correctness and efficiency of algorithms. Computational complexity: time and space bounds. Techniques for best-case, worst-case and average-case time and space analysis.', 3)
-	appendCourse('COMP2511: Object-Oriented Design & Programming', 'This course aims to introduce students to the principles of object-oriented design and to fundamental techniques in object-oriented programming.', 2);
-	appendCourse('COMP4920: Management and Ethics', 'This course will develop a framework on which management and ethical issues can be developed.', 0);
-	appendCourse('COMP3900: Computer Science Project', 'A capstone software project. Students work in teams to define, implement and evaluate a real-world software system.', 1);
-	*/
 }
 document.addEventListener("DOMContentLoaded", main);
+
+function submitReviewListener(){
+    $(".submitReview" ).click(function(e) {
+        e.preventDefault();
+        console.log("hello");
+        console.log($(this).attr("course"));
+        c_code = $(this).attr("course"); 
+        $.ajax({
+            url: '/cgi-bin/index.cgi/submit',
+            async: false,
+            type: 'POST',
+            dataType: 'json',
+            contentType: 'application/json; charset=UTF-8',
+            data: //JSON.stringify({'name':'yannnnie'}),
+                $('#reviewform_'+c_code).serialize(),
+            success: function(response) {
+                console.log(response);
+                console.log("review success");
+                $('#nBox_'+c_code).val('');
+                $('#rBox_'+c_code).val('');
+                $('#rList_'+c_code).val(1);
+				$("#review-success").fadeTo(2000, 500).slideUp(500, function(){
+                 	$("#review-success").slideUp(500);
+                });
+
+            },
+            error: function(result,ts,err) {
+                console.log([result,ts,err]);
+                console.log("review failure");
+                $("#success-failure").fadeTo(2000, 500).slideUp(500, function(){
+                 	$("#success-failure").slideUp(500);
+                });
+
+            }
+        });
+
+    });
+
+
+}
+
 $(document).ready(function(){
 
     $("[data-toggle=popover]").popover({
@@ -474,41 +506,5 @@ $(document).ready(function(){
         });
         
     });
-    $(".submitReview" ).click(function(e) {
-        e.preventDefault();
-        console.log("hello");
-        console.log($(this).attr("course"));
-        c_code = $(this).attr("course"); 
-        $.ajax({
-            url: '/cgi-bin/index.cgi/submit',
-            async: false,
-            type: 'POST',
-            dataType: 'json',
-            contentType: 'application/json; charset=UTF-8',
-            data: //JSON.stringify({'name':'yannnnie'}),
-                $('#reviewform_'+c_code).serialize(),
-            success: function(response) {
-                console.log(response);
-                console.log("review success");
-                $('#nBox_'+c_code).val('');
-                $('#rBox_'+c_code).val('');
-                $('#rList_'+c_code).val(1);
-				$("#review-success").fadeTo(2000, 500).slideUp(500, function(){
-                 	$("#review-success").slideUp(500);
-                });
-
-            },
-            error: function(result,ts,err) {
-                console.log([result,ts,err]);
-                console.log("review failure");
-                $("#success-failure").fadeTo(2000, 500).slideUp(500, function(){
-                 	$("#success-failure").slideUp(500);
-                });
-
-            }
-        });
-
-    });
-
-
+    submitReviewListener();
 });
