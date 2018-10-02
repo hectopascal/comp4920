@@ -11,7 +11,7 @@ app = Flask(__name__)
 
 @app.route('/get_reviews', methods=['GET', 'POST'])
 def get_reviews():
-	sql = """SELECT * FROM reviews"""
+	sql = """SELECT * FROM reviews WHERE course='%s'"""
 	conn = None
 	vendor_id = None
 	try:
@@ -21,7 +21,7 @@ def get_reviews():
                            password = "gill")
 
 		cur = conn.cursor()
-		cur.execute(sql)
+		cur.execute(sql % request.data)
 
 		records = cur.fetchall()
 
@@ -96,8 +96,9 @@ def submit_form():
     print(request.data,file=sys.stderr)
     course, name, rating, review = request.data.split("&",3)
     
-    value,course    = name.split('=',1)
+    value,course    = course.split('=',1)
     offering        = 5 #temporary value until all the offering/course information is in the database
+    score           = 0
     print(course,file=sys.stderr)
     value,name      = name.split('=',1)
     user            = urllib2.unquote(name)
@@ -108,8 +109,8 @@ def submit_form():
     review          = urllib2.unquote(review)
     
     """ insert a new review """
-    sql = """INSERT INTO reviews(offering,rating,feedback,author)
-             VALUES(%s,%s,%s,%s) RETURNING feedback;"""
+    sql = """INSERT INTO reviews(rating,feedback,author,score,course)
+             VALUES(%s,%s,%s,%s,%s) RETURNING feedback;"""
     conn = None
     vendor_id = None
     try:
@@ -122,7 +123,7 @@ def submit_form():
         # create a new cursor
         cur = conn.cursor()
         # execute the INSERT statement
-        cur.execute(sql, (offering,rating,review,user))
+        cur.execute(sql, (rating,review,user,score,course))
         # get the generated id back
         vendor_id = cur.fetchone()[0]
         # commit the changes to the database

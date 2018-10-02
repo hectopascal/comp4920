@@ -75,13 +75,13 @@ function appendCourse(c_code, c_title, c_faculty, c_school, c_study_level,
 	var load_prompt = document.createElement('button');
 	var load_prompt_i = document.createElement('i');
 	load_prompt.setAttribute('type', 'submit');
-	load_prompt.setAttribute('id', 'showReviews');
-	load_prompt.setAttribute('class', 'btn btn-default');
+	load_prompt.setAttribute('class', 'btn btn-default showReviews');
 	load_prompt.setAttribute('data-toggle', 'collapse');
 	load_prompt.setAttribute('href', '#' + c_code + '_forum');
 	load_prompt.setAttribute('role', 'button');
 	load_prompt.setAttribute('aria-expanded', 'false');
 	load_prompt.setAttribute('aria-controls', c_code + '_forum');
+	load_prompt.setAttribute('course', c_code);
 	load_prompt.setAttribute('toggled', 'n');
 
 	load_prompt_i.setAttribute('class', 'fas fa-chevron-down');
@@ -151,11 +151,11 @@ function display_search(results){
 
 function display_reviews(c_code, results)
 {
-	var c_forum = document.getElementById(c_code);
+	var c_forum = document.getElementById(c_code + '_forum');
 	c_forum.innerHTML = "";
 	for(var i = 0; i < results.length; i++)
 	{
-		c_forum.appendChild(appendPost(results[i][3], results[i][2], results[i][4]));
+		c_forum.appendChild(appendPost(results[i][3], results[i][1], results[i][2]));
 	}
 }
 
@@ -409,9 +409,9 @@ $(document).ready(function(){
         }
     });
 
-	$('#showReviews').click(function(e) {
+	$('.showReviews').click(function(e) {
 		e.preventDefault();
-        c_code = $(this).attr("aria-controls"); 
+        c_code = $(this).attr("course"); 
 		console.log('showing reviews for ' + c_code);
 		$.ajax({
 			url: '/cgi-bin/index.cgi/get_reviews',
