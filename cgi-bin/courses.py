@@ -170,7 +170,7 @@ def submit_form():
         mean = float(meta[0][0])
         count = int(meta[0][1])
         count = count+1
-        mean = (mean + float(count-1)*float(rating))/float(count)
+        mean = (float(count-1)*mean + float(rating))/float(count)
         cur.execute(set_mean,(mean,int(count),course))
         conn.commit()
         cur.close()
