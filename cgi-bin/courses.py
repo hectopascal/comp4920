@@ -6,6 +6,8 @@ import psycopg2
 from flask import Flask, render_template, request, redirect, Response
 import sys
 import urllib2
+import hashlib
+
 app = Flask(__name__)
 #sys.stderr = sys.stdout
 
@@ -178,6 +180,73 @@ def submit_form():
         if conn is not None:
             conn.close()
     return  json.dumps({'success':True}), 200, {'ContentType':'application/json'}
+
+
+@app.route('/login', methods=['POST'])
+def login_verify():
+
+   data = request.get_json()
+
+   # get the data from fields in the POST form
+   username = data.get('user', '')
+   password = data.get('pass', '')
+
+   # TODO: Delete this later - just for testing
+   #username = 'apple'
+   #password = '123'
+
+   # convert username to lowercase
+   username = username.lower()
+
+   # check if either username or password is empty
+   if username == '' or password == '':
+      return json.dumps({'success':False}), 200, {'ContentType':'application/json'} 
+
+   
+   conn = None  
+
+   try:
+      # connect to the PostgreSQL database
+      conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com", 
+                              database = "cs4920", 
+                              user = "gill", 
+                              password = "gill")
+
+      # create a new cursor
+      cur = conn.cursor()
+      
+      # check if the username is used before 
+      cur.execute('SELECT password, salt FROM users WHERE username = %s;', (username,))
+      exist = cur.fetchall()
+
+      # close the connection to the postgresql database
+      cur.close()
+      conn.close()
+
+      # if [] is returned, it means the user does not exist
+      if not exist:
+         return "Sorry, The username \'{}\' is NOT existed !!".format(username)
+
+      # Get the salt from the fetched results, then
+      # compare stored hash with that of the input password (plus salt)
+      pwd_hash, salt = exist[0] 
+      password += salt            
+
+      h = hashlib.sha256()
+      h.update(password.encode(encoding='utf8'))
+      
+      if pwd_hash == h.digest().hex():
+         return json.dumps({'success':True}), 200, {'ContentType':'application/json'} 
+
+      return json.dumps({'success':False}), 200, {'ContentType':'application/json'} 
+
+   except (Exception, psycopg2.DatabaseError) as error:
+      print(error,file=sys.stderr)
+
+      if conn is not None:
+         conn.close()
+
+      return "Error Error Error !!!"
 
 if __name__ == '__main__':
    app.run()
