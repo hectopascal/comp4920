@@ -51,7 +51,7 @@ function appendPost(user_title, rating, post,pId, score)
 }
 
 function appendCourse(c_code, c_title, c_faculty, c_school, c_study_level,
-	c_terms, c_campus, c_hours, c_info, rating)
+	c_terms, c_campus, c_hours, c_info, rating, c_num_reviews)
 {
 	var celem  = document.createElement('div');
 	var cflex  = document.createElement('div');
@@ -86,6 +86,11 @@ function appendCourse(c_code, c_title, c_faculty, c_school, c_study_level,
 	celem.appendChild(cnode1);
 
 	cflex.appendChild(appendRating(rating));
+
+    var reviewCount = document.createElement('span');
+    reviewCount.innerHTML = '(' + c_num_reviews + ')';
+    reviewCount.setAttribute('style', 'margin-left: 5px;');
+    cflex.appendChild(reviewCount);
 
 	var ccomments = document.createElement('div');
 	var load_prompt = document.createElement('button');
@@ -150,8 +155,8 @@ function display_courses(results){
         //console.log(results);
         //var courses = JSON.parse(results);
         for (var i = 0 ; i < results.length; i++){
-		    var rating = getRating(results[i][1]);
-            appendCourse(results[i][1], results[i][2], "Faculty of Engineering", "School of Computer Science", "UGRD", 1 , 'Kensington', 6, results[i][3], rating);
+            var rating = results[i][4];
+            appendCourse(results[i][1], results[i][2], "Faculty of Engineering", "School of Computer Science", "UGRD", 1 , 'Kensington', 6, results[i][3], rating, results[i][5]);
         }
         addReviewSection();
         submitReviewListener();

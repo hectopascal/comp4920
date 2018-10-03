@@ -121,7 +121,24 @@ def json_courses():
                            password = "kelvin")
    
    cur = conn.cursor()
-   cur.execute("SELECT * FROM courses limit 10;")
+
+   sql = '''
+        select
+            courses.id,
+            courses.code,
+            courses.name,
+            courses.description,
+            cast(avg(reviews.rating) as float),
+            count(reviews.*)
+        from courses
+        left join reviews on courses.code = reviews.course
+        group by courses.id, courses.code, courses.name, courses.description
+        order by
+            case when avg(reviews.rating) is null then 1 end desc,
+            avg(reviews.rating) desc
+        limit 10
+   '''
+   cur.execute(sql, None)
    
    records = cur.fetchall()
    return json.dumps(records)
