@@ -177,6 +177,7 @@ function getRating(course){
     });
   return rating;
 }
+
 function display_reviews(c_code, results)
 {
 	var c_forum = document.getElementById(c_code + '_forum');
@@ -195,64 +196,7 @@ function display_reviews(c_code, results)
     updown_Listener();
 }
 
-function update_review(score,post){
-    pId = post.split("_")[1];
-    console.log(pId);
-    //remove text node
-    var div = document.getElementById('review_'+pId);
-    div.removeChild(div.childNodes[0]);
-    div.insertBefore(document.createTextNode(score),div.childNodes[0]);
-    
-}
-function updown_Listener(){
-    $(".uprev").click(function(e) {
-        e.preventDefault();
-        console.log($(this).attr('pid'));
-        var post = $(this).attr('pid');
-        $.ajax({
-            url: '/cgi-bin/index.cgi/rate_review',
-            async: false,
-            type: 'POST',
-            dataType: 'json',
-            contentType: 'application/json; charset=UTF-8',
-            data: JSON.stringify({"type":0, "post":post}),
-            success: function(response) {
-                console.log(response);
-				update_review(response,post);
-            }, error: function(result,ts,err) {
-                console.log(result);
-                console.log([result,ts,err]);
-            }
-        });
-        
-    });
 
-    $(".downrev").click(function(e) {
-        e.preventDefault();
-        console.log($(this).attr('pid'));
-        var post = $(this).attr('pid');
-        $.ajax({
-            url: '/cgi-bin/index.cgi/rate_review',
-            async: false,
-            type: 'POST',
-            dataType: 'json',
-            contentType: 'application/json; charset=UTF-8',
-            data: JSON.stringify({"type":1, "post":post}),
-            success: function(response) {
-                console.log(response);
-				update_review(response,post);
-            }, error: function(result,ts,err) {
-                console.log(result);
-                console.log([result,ts,err]);
-            }
-        });
-        
-    });
-
-
-
-
-}
 function reviewForm(k,c_code)
 {
     var div = document.createElement('div');
