@@ -39,7 +39,7 @@ function appendPost(user_title, rating, post,pId, score)
     cpost_title.appendChild(div);
     div.appendChild(document.createTextNode(score));
     var up = document.createElement('i');
-    up.setAttribute("class","fas fa-arrow-up uprev");
+    up.setAttribute("class","fas fa-arrow-up uprev mr-2 ml-2");
 	up.setAttribute('pid',"post_"+pId);
     var down = document.createElement('i');
     down.setAttribute("class","fas fa-arrow-down downrev");
