@@ -12,6 +12,51 @@ app = Flask(__name__)
 #sys.stderr = sys.stdout
 
 
+@app.route('/rate_review', methods=['POST'])
+def rate_review():
+
+    data = request.get_json()
+
+    # get the data from fields in the POST form
+    # rate up change = 0 rate down change = 1
+    change = data.get('type', '')
+    value,postid = data.get('post', '').split('_',1);
+
+    conn = None  
+    get_score = """SELECT score FROM reviews WHERE id=%s"""
+    set_score = """UPDATE reviews SET score=%s WHERE id=%s"""
+    conn = None
+    vendor_id = None
+    try:
+        conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com", 
+                           database = "cs4920", 
+                           user = "gill", 
+                           password = "gill")
+
+        cur = conn.cursor()
+        cur.execute(get_score % postid)
+        score = cur.fetchall()[0][0]
+        #update score
+        if(change == 1):
+            score = score - 1
+        elif(change == 0):
+            score = score + 1
+        cur.execute(set_score,(score,postid))
+        #commit & close
+        conn.commit()
+        cur.close()
+        
+        if conn is not None:
+            conn.close()
+        return json.dumps(score)
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error,file=sys.stderr)
+        if conn is not None:
+                conn.close()
+    
+    return "Error Error Error !!!"
+
+
 @app.route('/meanrating', methods=['GET', 'POST'])
 def get_mean_rating():
 	sql = """SELECT mean_rating FROM courses WHERE code='%s'"""
@@ -27,8 +72,6 @@ def get_mean_rating():
             cur.execute(sql % request.data)
 
             records = cur.fetchall()
-            conn.commit()
-
             cur.close()
             if conn is not None:
                     conn.close()

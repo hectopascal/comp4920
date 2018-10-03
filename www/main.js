@@ -18,19 +18,34 @@ function appendRating(rating)
 	return crating;
 }
 
-function appendPost(user_title, rating, post)
+function appendPost(user_title, rating, post,pId, score)
 {
 	var cpost = document.createElement('div');
 	cpost.setAttribute('class', 'py-2 bg-light');
     var cpost_title = document.createElement('div');
 	cpost_title.setAttribute('class', 'post-header d-flex bg-dark text-white p-1 rounded');
-	cpost_title.appendChild(document.createTextNode(user_title + ' posted:'));
+    cpost_title.appendChild(document.createTextNode(user_title + ' posted:'));
 	cpost.appendChild(cpost_title);
 
 	var ccontent = document.createElement('div');
 	ccontent.setAttribute('class', 'pl-2 p-1');
 	ccontent.appendChild(document.createTextNode(post));
 	cpost.appendChild(ccontent);
+    
+    //rate reviews functionality
+    var div = document.createElement('div');
+    div.setAttribute("class", "d-flex justify-content-end");
+    div.setAttribute('id',"review_"+pId);
+    cpost_title.appendChild(div);
+    div.appendChild(document.createTextNode(score));
+    var up = document.createElement('i');
+    up.setAttribute("class","fas fa-arrow-up uprev");
+	up.setAttribute('pid',"post_"+pId);
+    var down = document.createElement('i');
+    down.setAttribute("class","fas fa-arrow-down downrev");
+	down.setAttribute('pid',"post_"+pId);
+    div.appendChild(up);
+    div.appendChild(down);
 
 	return cpost;
 }
@@ -166,26 +181,78 @@ function display_reviews(c_code, results)
 {
 	var c_forum = document.getElementById(c_code + '_forum');
 	c_forum.innerHTML = "";
-	for(var i = 0; i < results.length; i++)
+    var postID_arr = new Array(results.length);
+    console.log(results);
+	results.sort(function(a,b){
+        return b[4]-a[4];
+    });
+    console.log(results);
+    for(var i = 0; i < results.length; i++)
 	{
-		c_forum.appendChild(appendPost(results[i][3], results[i][1], results[i][2]));
+		c_forum.appendChild(appendPost(results[i][3], results[i][1], results[i][2],results[i][0], results[i][4]));
 	}
+
+    updown_Listener();
 }
 
-function rate_reviews(){
-    var header = document.getElementsByClassName('post-header');
-    console.log(header.length);
-    for(var i=0;i<header.length;i++){
-    	var up = document.createElement('i');
-        up.setAttribute("class","fas fa-arrow-up");
-	    var down = document.createElement('i');
-        down.setAttribute("class","fas fa-arrow-down");
-        header[i].appendChild(up);
-        header[i].appendChild(down);
+function update_review(score,post){
+    pId = post.split("_")[1];
+    console.log(pId);
+    //remove text node
+    var div = document.getElementById('review_'+pId);
+    div.removeChild(div.childNodes[0]);
+    div.insertBefore(document.createTextNode(score),div.childNodes[0]);
+    
+}
+function updown_Listener(){
+    $(".uprev").click(function(e) {
+        e.preventDefault();
+        console.log($(this).attr('pid'));
+        var post = $(this).attr('pid');
+        $.ajax({
+            url: '/cgi-bin/index.cgi/rate_review',
+            async: false,
+            type: 'POST',
+            dataType: 'json',
+            contentType: 'application/json; charset=UTF-8',
+            data: JSON.stringify({"type":0, "post":post}),
+            success: function(response) {
+                console.log(response);
+				update_review(response,post);
+            }, error: function(result,ts,err) {
+                console.log(result);
+                console.log([result,ts,err]);
+            }
+        });
         
-    }
-}
+    });
 
+    $(".downrev").click(function(e) {
+        e.preventDefault();
+        console.log($(this).attr('pid'));
+        var post = $(this).attr('pid');
+        $.ajax({
+            url: '/cgi-bin/index.cgi/rate_review',
+            async: false,
+            type: 'POST',
+            dataType: 'json',
+            contentType: 'application/json; charset=UTF-8',
+            data: JSON.stringify({"type":1, "post":post}),
+            success: function(response) {
+                console.log(response);
+				update_review(response,post);
+            }, error: function(result,ts,err) {
+                console.log(result);
+                console.log([result,ts,err]);
+            }
+        });
+        
+    });
+
+
+
+
+}
 function reviewForm(k,c_code)
 {
     var div = document.createElement('div');
@@ -323,13 +390,11 @@ function main()
 		dataType: 'json',
 		contentType: 'application/json; charset=UTF-8',
 		success: function(response) {
-			console.log(response);
 			display_courses(response);
 		}, error: function(result,ts,err) {
 			console.log([result,ts,err]);
 		}
 	});
-    rate_reviews();
 }
 document.addEventListener("DOMContentLoaded", main);
 
@@ -343,8 +408,7 @@ function submitReviewListener(){
             type: 'POST',
             dataType: 'json',
             contentType: 'application/json; charset=UTF-8',
-            data: //JSON.stringify({'name':'yannnnie'}),
-                $('#reviewform_'+c_code).serialize(),
+            data: $('#reviewform_'+c_code).serialize(),
             success: function(response) {
                 console.log(response);
                 console.log("review success");
@@ -394,6 +458,7 @@ $(document).ready(function(){
 			success: function(response) {
 				console.log(response);
 				display_reviews(c_code, response);
+
 			}, error: function(result,ts,err) {
 				console.log([result,ts,err]);
 			}
@@ -404,7 +469,7 @@ $(document).ready(function(){
     $('#review-failure').hide();
     $("#searchButton" ).click(function(e) {
         e.preventDefault();
-        console.log("searched");
+            console.log("searched");
         console.log($('#searchForm').serialize());
         $.ajax({
             url: '/cgi-bin/index.cgi/search',
