@@ -150,7 +150,7 @@ function display_courses(results){
         //console.log(results);
         //var courses = JSON.parse(results);
         for (var i = 0 ; i < results.length; i++){
-		    var rating = getRating(results[i][1]);
+            var rating = results[i][4];
             appendCourse(results[i][1], results[i][2], "Faculty of Engineering", "School of Computer Science", "UGRD", 1 , 'Kensington', 6, results[i][3], rating);
         }
         addReviewSection();
