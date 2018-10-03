@@ -304,7 +304,7 @@ def login_verify():
       h = hashlib.sha256()
       h.update(password.encode(encoding='utf8'))
       
-      if pwd_hash == h.digest().hex():
+      if pwd_hash == h.hexdigest():
          return json.dumps({'success':True}), 200, {'ContentType':'application/json'} 
 
       return json.dumps({'success':False}), 200, {'ContentType':'application/json'} 
