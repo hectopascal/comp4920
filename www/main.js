@@ -520,7 +520,7 @@ $(document).ready(function(){
             async: false,
             type: 'POST',
             dataType: 'json',
-            contentType: 'application/json; charset=UTF-8',
+            contentType: 'application/json',
             data: JSON.stringify({"user":username, "pass":password}),
             success: function(response) {
 				console.log("login success");
