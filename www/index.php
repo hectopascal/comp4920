@@ -17,7 +17,7 @@
 
     <body class="bg-light">
 	<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  	<a class="navbar-brand" href="#">Navbar</a>
+  	<a class="navbar-brand" href="#">Rear Window</a>
   	<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
@@ -47,25 +47,41 @@
     </ul>
     <form id="searchForm" class="form-inline my-2 my-lg-0" method="post" accept-charset="utf-8">
 	<input id="searchField" name="searchfield" class="form-control mr-sm-2" type="text" placeholder="Course name / code">
-					<button type="submit" id="searchButton" class="btn btn-light my-2 my-sm-0 mr-2">Search</button>
+	<button type="submit" id="searchButton" class="btn btn-light my-2 my-sm-0 mr-2">Search</button>
+	<button type="Login" id="loginButton" class="btn btn-light my-2 my-sm-0 mr-2" data-toggle="modal" data-target="#loginModal">Login</button>
     </form>
+
+  <div class ="modal" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="loginModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+	  <div class="modal-content">
+	    <div class="modal-header">
+		  <h5 class="modal-title" id="loginModalLabel">Login</h5>
+		  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+		    <span aria-hidden="true">&times;</span>
+		  </button>
+		</div>
+		<div class="modal-body">
+          <form class="form-inline" role="form">
+            <div class="form-group">
+              <input id="username" placeholder="Email" class="form-control mr-2" type="text">
+              <input id="password" placeholder="Password" class="form-control" minlength="6" type="password">
+            </div>
+          </form>
+		</div>
+		<div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+		  <button type="button" class="btn btn-primary">Login</button>
+		</div>
+      </div>
+	</div>
+  </div>
 
   </div>
 </nav>
 	
 <!--		<button data-placement="bottom" data-toggle="popover" data-title="" data-container="body" type="button" class="btn btn-light my-2 my-sm-0 mr-2" data-html="true" href="#" id="login">Login</button> -->
-  	<div id="popover-content" class="hide">
-    <form class="form-inline" role="form">
-      <div class="form-group">
-        <input id="username" placeholder="Email" class="form-control" type="text">
-		<p>
-        <input id="password" placeholder="Password" class="form-control" minlength="6" type="password">
-        <button type="submit" class="btn btn-primary" id="loginButton">Login</button>
-      </div>
-    </form>
-  </div>
-		<main id="main_body" role="main" class="container">
-        </main>
-	</body>
+
+	<main id="main_body" role="main" class="container"></main>
+</body>
 
 </html>
