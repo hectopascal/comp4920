@@ -48,10 +48,11 @@
       </li>
     </ul>
     <form id="searchForm" class="form-inline my-2 my-lg-0" method="post" accept-charset="utf-8">
-	<input id="searchField" name="searchfield" class="form-control mr-sm-2" type="text" placeholder="Course name / code">
-	<button type="submit" id="searchButton" class="btn btn-light my-2 my-sm-0 mr-2">Search</button>
-	<button type="Login" id="loginButton" class="btn btn-light my-2 my-sm-0 mr-2" data-toggle="modal" data-target="#loginModal">Login</button>
+	  <input id="searchField" name="searchfield" class="form-control mr-sm-2" type="text" placeholder="Course name / code">
+	  <button type="submit" id="searchButton" class="btn btn-light my-2 my-sm-0 mr-2">Search</button>
     </form>
+	<button id="loginButton" class="btn btn-light my-2 my-sm-0 mr-2" data-toggle="modal" data-target="#loginModal">Login</button>
+	<button id="signupButton" class="btn btn-light my-2 my-sm-0 mr-2" data-toggle="modal" data-target="#signupModal">Register</button>
 
   <div class ="modal" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="loginModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
@@ -76,8 +77,43 @@
 		</div>
       </div>
 	</div>
-
   </div>
+
+  <div class ="modal" id="signupModal" tabindex="-1" role="dialog" aria-labelledby="signupModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+	  <div class="modal-content">
+	    <div class="modal-header">
+		  <h5 class="modal-title" id="signupModalLabel">Register</h5>
+		  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+		    <span aria-hidden="true">&times;</span>
+		  </button>
+		</div>
+		<div class="modal-body">
+          <form role="form">
+            <div class="form-group">
+              <input name="nickname" placeholder="Name" class="form-control mr-2" type="text">
+            </div>
+            <div class="form-group">
+              <input name="username" placeholder="Email" class="form-control mr-2" type="text">
+            </div>
+            <div class="form-group">
+              <input name="password" placeholder="Password" class="form-control" minlength="6" type="password">
+            </div>
+            <div class="form-group">
+              <input name="confirm-password" placeholder="Confirm Password" class="form-control" minlength="6" type="password">
+            </div>
+            <div class="form-feedback">asdf</div>
+          </form>
+		</div>
+		<div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+		  <button id="register-submit" type="button" class="btn btn-primary">Register</button>
+		</div>
+      </div>
+	</div>
+  </div>
+
+    </div>
 </nav>
 	
 <!--		<button data-placement="bottom" data-toggle="popover" data-title="" data-container="body" type="button" class="btn btn-light my-2 my-sm-0 mr-2" data-html="true" href="#" id="login">Login</button> -->

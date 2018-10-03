@@ -479,6 +479,43 @@ $(document).ready(function(){
                 console.log([result,ts,err]);
             }
         });
-        
+    });
+
+	$("#register-submit").click(function(e) {
+        e.preventDefault();
+
+        $("#signupModal .form-feedback").removeClass('invalid');
+
+        var password = $("#signupModal input[name=password]").val()
+        var passwordConfirm = $("#signupModal input[name=confirm-password]").val() 
+        if (password === passwordConfirm) {
+            var data = {
+                user: $("#signupModal input[name=username]").val(),
+                pass: $("#signupModal input[name=password]").val(),
+                name: $("#signupModal input[name=nickname]").val()
+            }
+
+            $.ajax({
+                url: '/cgi-bin/index.cgi/signup',
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: function(response) {
+                    if (response.success) {
+                        $("#signupModal").trigger('click');
+                    } else {
+                        $("#signupModal .form-feedback").html(response.message);
+                        $("#signupModal .form-feedback").addClass("invalid");
+                    }
+                }, error: function(result,st,err) {
+                    console.log("login failed");
+                    console.log([result,st,err]);
+                }
+            });
+        } else {
+            $("#signupModal .form-feedback").html("Passwords do not match!");
+            $("#signupModal .form-feedback").addClass("invalid");
+        }
     });
 });

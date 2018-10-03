@@ -2,8 +2,10 @@
 
 from __future__ import print_function
 import random,json
-import psycopg2
+import psycopg2, psycopg2.extras
 from flask import Flask, render_template, request, redirect, Response
+import binascii
+import os
 import sys
 import urllib2
 import hashlib
@@ -11,7 +13,29 @@ import hashlib
 app = Flask(__name__)
 #sys.stderr = sys.stdout
 
+def queryDatabase(sql, data, fetchone = False):
+    dsn = 'host=%s dbname=%s user=%s password=%s' % (
+        'cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com',
+        'cs4920',
+        'gill',
+        'gill'
+    )
 
+    ret = []
+
+    with psycopg2.connect(dsn=dsn, cursor_factory=psycopg2.extras.DictCursor) as db:
+        with db.cursor() as cursor:
+            cursor.execute(sql, data)
+            try:
+                if fetchone:
+                    ret = cursor.fetchone()
+                else:
+                    ret = cursor.fetchall()
+            except:
+                ret = None
+
+    return ret
+    
 @app.route('/rate_review', methods=['POST'])
 def rate_review():
 
@@ -267,6 +291,59 @@ def submit_form():
             conn.close()
     return  json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 
+@app.route('/signup', methods=['POST'])
+def signup():
+    users = queryDatabase('select * from users', None)
+
+    try:
+        data = request.get_json()
+    except:
+        return json.dumps({'success': False, 'message': 'Unable to parse json'})
+
+    username = data.get('user')
+    password = data.get('pass')
+    nickname = data.get('name')
+
+    if username is None:
+        return json.dumps({'success': False, 'message': 'Missing username'})
+
+    if not username:
+        return json.dumps({'success': False, 'message': 'Username may not be empty'})
+
+    if password is None:
+        return json.dumps({'success': False, 'message': 'Missing password'})
+
+    existingUsers = queryDatabase('select * from users where username = %s', (username,))
+
+    if existingUsers:
+        return json.dumps({'success': False, 'message': 'User already exists!'})
+
+    salt = binascii.hexlify(os.urandom(32))
+    password += salt
+
+    h = hashlib.sha256()
+    h.update(password.encode(encoding='utf8'))
+
+    hashedPassword = h.hexdigest()
+
+    sql = 'insert into users (username, nickname, password, salt) values (%s, %s, %s, %s) returning id'
+    newUserId = queryDatabase(sql, (username, nickname, hashedPassword, salt), True)
+
+    if newUserId is None:
+        return json.dumps({'success': False, 'message': 'Failed to create user'})
+
+    sql = 'select username, nickname from users where id = %s'
+    newUser = queryDatabase(sql, (newUserId.get('id'),), True)
+
+    return json.dumps(
+        {
+            'success': True,
+            'data': {
+                'username': newUser.get('username'),
+                'nickname': newUser.get('nickname')
+            }
+        }
+    )
 
 @app.route('/login', methods=['POST'])
 def login_verify():

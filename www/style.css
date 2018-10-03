@@ -16,3 +16,13 @@
 .star-rating-empty {
 	font-weight: 0;
 }
+
+.form-feedback {
+    display: none;
+}
+
+.form-feedback.invalid {
+    display: block;
+    color: #dc3545;
+}
+
