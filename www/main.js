@@ -160,6 +160,7 @@ function display_courses(results){
         }
         addReviewSection();
         submitReviewListener();
+		showReviewListener();
     } else {
         //do nothing
     }
@@ -380,19 +381,10 @@ function submitReviewListener(){
         });
 
     });
-
-
 }
 
-$(document).ready(function(){
-
-    $("[data-toggle=popover]").popover({
-        html: true, 
-        content: function() {
-            return $('#popover-content').html();
-        }
-    });
-
+function showReviewListener()
+{
 	$('.showReviews').click(function(e) {
 		e.preventDefault();
         c_code = $(this).attr("course"); 
@@ -413,6 +405,16 @@ $(document).ready(function(){
 			}
 		});
 	});
+}
+
+$(document).ready(function(){
+
+    $("[data-toggle=popover]").popover({
+        html: true, 
+        content: function() {
+            return $('#popover-content').html();
+        }
+    });
 
     $('#review-success').hide();
     $('#review-failure').hide();
