@@ -139,14 +139,19 @@ def get_reviews():
 
 @app.route('/courses', methods=['POST'])
 def json_courses():
-   conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com", 
+    conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com", 
                            database = "cs4920", 
                            user = "kelvin", 
                            password = "kelvin")
    
-   cur = conn.cursor()
+    cur = conn.cursor()
 
-   sql = '''
+    data = request.get_json()
+    limit = data.get('limit', '')
+    offset = data.get('offset', '')
+    print(limit,file=sys.stderr)
+
+    sql = '''
         select
             courses.id,
             courses.code,
@@ -160,18 +165,22 @@ def json_courses():
         order by
             case when avg(reviews.rating) is null then 1 end desc,
             avg(reviews.rating) desc
-        limit 10
-   '''
-   cur.execute(sql, None)
+        limit %s offset %s ;
+    '''
+    cur.execute(sql, (limit,offset))
    
-   records = cur.fetchall()
-   return json.dumps(records)
+    records = cur.fetchall()
+    return json.dumps(records)
 
 @app.route('/filter', methods=['POST'] )
 def filter_course():
-    value,search_term    = request.data.split('=',1)
+    data = request.get_json()
+    search_term = data.get('term','')
+    offset = data.get('offset','')
     """ insert a new review """
-    sql = """SELECT * FROM courses WHERE (LOWER(code) LIKE LOWER('%%'|| '%s' || '%%')) limit 10; """
+    sql = """SELECT * FROM courses 
+            WHERE (LOWER(code) LIKE LOWER('%%'|| %s || '%%'))
+            limit 10 offset %s ; """
     conn = None
     vendor_id = None
     try:
@@ -180,7 +189,7 @@ def filter_course():
                            user = "gill", 
                            password = "gill")
         cur = conn.cursor()
-        cur.execute(sql % search_term)
+        cur.execute(sql, (search_term, offset))
         records = cur.fetchall()
         conn.commit()
         cur.close()
@@ -194,15 +203,19 @@ def filter_course():
     return ""
 
 
-@app.route('/search', methods=['GET','POST'] )
+@app.route('/search', methods=['POST'] )
 def search_course():
-    #print(request.form,file=sys.stderr)
-    #print(request.values,file=sys.stderr)
-    #print(request.args,file=sys.stderr)
-    value,search_term    = request.data.split('=',1)
+    #value,search_term    = request.data.split('=',1)
+    data = request.get_json()
+    print(data,file=sys.stderr)
+    search_term = data.get('term','')
+    offset = data.get('offset','')
+    print(offset,file=sys.stderr)
     """ insert a new review """
-    sql = """SELECT * FROM courses WHERE (LOWER(code) LIKE LOWER('%%'|| %s || '%%'))
-            or (LOWER(name) LIKE LOWER('%%' || %s || '%%'));"""
+    sql = """SELECT * FROM courses 
+            WHERE (LOWER(code) LIKE LOWER('%%'|| %s || '%%')) or 
+            (LOWER(name) LIKE LOWER('%%' || %s || '%%'))
+            limit 10 offset %s ; """
     conn = None
     vendor_id = None
     try:
@@ -215,14 +228,11 @@ def search_course():
         # create a new cursor
         cur = conn.cursor()
         # execute the INSERT statement
-        cur.execute(sql, (search_term, search_term))
+        cur.execute(sql, (search_term, search_term, offset))
         # get the generated id back
         records = cur.fetchall()
         # commit the changes to the database
         conn.commit()
-        #cur.execute("SELECT * from reviews")
-        #records = cur.fetchall()
-        # close communication with the database
         cur.close()
         if conn is not None: 
             conn.close()
@@ -233,7 +243,7 @@ def search_course():
             conn.close()
     return ""
 
-@app.route('/submit', methods=['GET','POST'] )
+@app.route('/submit', methods=['POST'] )
 def submit_form():
     print(request.data,file=sys.stderr)
     course, name, rating, review = request.data.split("&",3)
@@ -252,12 +262,17 @@ def submit_form():
     
     """ insert a new review """
     sql = """INSERT INTO reviews(rating,feedback,author,score,course)
-             VALUES(%s,%s,%s,%s,%s) RETURNING feedback;"""
+             VALUES(%s,%s,%s,%s,%s) 
+             RETURNING feedback;"""
     conn = None
     vendor_id = None
     
-    get_mean = """SELECT mean_rating,review_count FROM courses WHERE code='%s' """
-    set_mean = """UPDATE courses SET mean_rating=%s, review_count=%s WHERE code=%s"""
+    get_mean = """SELECT mean_rating,review_count 
+                FROM courses 
+                WHERE code='%s' """
+    set_mean = """UPDATE courses 
+            SET mean_rating=%s, review_count=%s 
+            WHERE code=%s"""
     try:
         # read database configuration
         # connect to the PostgreSQL database
@@ -272,16 +287,16 @@ def submit_form():
 
         conn.commit()
         #update average rating
-        print("before executed get mean",file=sys.stderr)
         result = cur.execute(get_mean % course)
-        print("executed get mean",file=sys.stderr)
         meta = cur.fetchall()
-        print(meta[0],file=sys.stderr)
         mean = float(meta[0][0])
+        
         count = int(meta[0][1])
         count = count+1
         mean = (float(count-1)*mean + float(rating))/float(count)
+        
         cur.execute(set_mean,(mean,int(count),course))
+        
         conn.commit()
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:

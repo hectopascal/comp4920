@@ -1,3 +1,13 @@
+var offset=0;
+const MAIN = 0;
+const SEARCH = 1;
+const FILTER = 2;
+
+var curpage = MAIN;
+var last_query = '';
+var hitbottom= true;
+
+
 function appendRating(rating)
 {
 	var crating = document.createElement('span');
@@ -144,21 +154,37 @@ function appendCourse(c_code, c_title, c_faculty, c_school, c_study_level,
 	document.getElementById('main_body').appendChild(celem);
 }
 
-function display_courses(results){
+function clear_main(){
     
     var main = document.getElementById('main_body');
     while(main.firstChild){
         main.removeChild(main.firstChild);
     }
 
+
+}
+function display_courses(results){
     if(results !== ""){
         //console.log(results);
         //var courses = JSON.parse(results);
         for (var i = 0 ; i < results.length; i++){
             var rating = results[i][4];
-            appendCourse(results[i][1], results[i][2], "Faculty of Engineering", "School of Computer Science", "UGRD", 1 , 'Kensington', 6, results[i][3], rating, results[i][5]);
+            
+            var c_code = results[i][1]; 
+            if(!document.getElementById(c_code)){
+                appendCourse(c_code, results[i][2], "Faculty of Engineering", "School of Computer Science", "UGRD", 1 , 'Kensington', 6, results[i][3], rating, results[i][5]);
+                //insert review section
+                var tog_rev = document.createElement('button');
+                tog_rev.type = 'submit';
+                tog_rev.setAttribute('data-toggle','collapse');
+                tog_rev.setAttribute('data-target', '#reviewDiv'+c_code);
+                tog_rev.textContent = "Review";
+                tog_rev.setAttribute('class',  "tog_rev btn btn-info btn-lg");
+                var node = document.getElementById(c_code);
+                node.insertBefore(reviewForm(c_code),node.childNodes[2]);
+                node.insertBefore(tog_rev,node.childNodes[2]);        
+            }
         }
-        addReviewSection();
         submitReviewListener();
 		showReviewListener();
     } else {
@@ -203,12 +229,12 @@ function display_reviews(c_code, results)
 }
 
 
-function reviewForm(k,c_code)
+function reviewForm(c_code)
 {
     var div = document.createElement('div');
     div.setAttribute('class', "form-group toggle collapse accordion-group");
     div.setAttribute('data-parent','#main_body');
-    div.id    = "reviewDiv"+k.toString();
+    div.id    = "reviewDiv"+c_code;
    
 
     var f = document.createElement("form");
@@ -288,236 +314,25 @@ function reviewForm(k,c_code)
     return div;
 
 }
-function addReviewSection(){
 
-    // Review form
-    var course_list = document.getElementsByClassName("course_summary");
-    
-    for(var k = 0; k<course_list.length;k++){
-        var tog_rev = document.createElement('button');
-        tog_rev.type = 'submit';
-        tog_rev.setAttribute('data-toggle','collapse');
-        tog_rev.setAttribute('data-target', '#reviewDiv'+k.toString());
-        tog_rev.textContent = "Review";
-        tog_rev.setAttribute('class',  "tog_rev btn btn-info btn-lg");
-        var node = course_list[k];
-        node.insertBefore(reviewForm(k,node.id),node.childNodes[2]);
-        node.insertBefore(tog_rev,node.childNodes[2]);        
-    
-    }
-
-
-    //append alerts
-    var alert_div = document.createElement('div');
-    alert_div.setAttribute('class', "alert alert-success");
-    alert_div.id = "review-success";
-    var close_alert = document.createElement('button');
-    close_alert.setAttribute("data-dismiss","alert");
-    close_alert.setAttribute("class","close");
-    
-    alert_div.appendChild(close_alert);
-	alert_div.appendChild(document.createTextNode("Review successfully submitted"));
-	document.getElementById('main_body').appendChild(alert_div);
-
-    alert_div = document.createElement('div');
-    alert_div.setAttribute('class', "alert alert-danger");
-    alert_div.id    = "review-failure";   
-    close_alert = document.createElement('button');
-    close_alert.setAttribute("data-dismiss","alert");
-    close_alert.setAttribute("class","close");
-
-	alert_div.appendChild(close_alert);
-    alert_div.appendChild(document.createTextNode("Review submission failed"));
-	document.getElementById('main_body').appendChild(alert_div);
-
-}
 function main()
 {
+	offset = 0;
+	curpage = MAIN;
 	$.ajax({
 		url: '/cgi-bin/index.cgi/courses',
 		async: false,
 		type: 'POST',
 		dataType: 'json',
 		contentType: 'application/json; charset=UTF-8',
+        data: JSON.stringify({"limit":10,"offset":offset}),
 		success: function(response) {
+			clear_main();
 			display_courses(response);
+            offset+=10;
 		}, error: function(result,ts,err) {
 			console.log([result,ts,err]);
 		}
 	});
 }
-document.addEventListener("DOMContentLoaded", main);
 
-function submitReviewListener(){
-    $(".submitReview" ).click(function(e) {
-        e.preventDefault();
-        c_code = $(this).attr("course"); 
-        $.ajax({
-            url: '/cgi-bin/index.cgi/submit',
-            async: false,
-            type: 'POST',
-            dataType: 'json',
-            contentType: 'application/json; charset=UTF-8',
-            data: $('#reviewform_'+c_code).serialize(),
-            success: function(response) {
-                console.log(response);
-                console.log("review success");
-                $('#nBox_'+c_code).val('');
-                $('#rBox_'+c_code).val('');
-                $('#rList_'+c_code).val(1);
-				$("#review-success").fadeTo(2000, 500).slideUp(500, function(){
-                 	$("#review-success").slideUp(500);
-                });
-
-            },
-            error: function(result,ts,err) {
-                console.log([result,ts,err]);
-                console.log("review failure");
-                $("#success-failure").fadeTo(2000, 500).slideUp(500, function(){
-                 	$("#success-failure").slideUp(500);
-                });
-
-            }
-        });
-
-    });
-}
-
-function showReviewListener()
-{
-	$('.showReviews').click(function(e) {
-		e.preventDefault();
-        c_code = $(this).attr("course"); 
-		console.log('showing reviews for ' + c_code);
-		$.ajax({
-			url: '/cgi-bin/index.cgi/get_reviews',
-			async: false,
-			type: 'POST',
-			dataType: 'json',
-			contentType: 'application/json; charset=UTF-8',
-			data: c_code,
-			success: function(response) {
-				console.log(response);
-				display_reviews(c_code, response);
-
-			}, error: function(result,ts,err) {
-				console.log([result,ts,err]);
-			}
-		});
-	});
-}
-
-$(document).ready(function(){
-
-    $("[data-toggle=popover]").popover({
-        html: true, 
-        content: function() {
-            return $('#popover-content').html();
-        }
-    });
-
-    $('#review-success').hide();
-    $('#review-failure').hide();
-    $("#searchButton" ).click(function(e) {
-        e.preventDefault();
-            console.log("searched");
-        console.log($('#searchForm').serialize());
-        $.ajax({
-            url: '/cgi-bin/index.cgi/search',
-            async: false,
-            type: 'POST',
-            dataType: 'json',
-            contentType: 'application/json; charset=UTF-8',
-            data:$('#searchForm').serialize(),
-            success: function(response) {
-                console.log(response);
-				display_courses(response);
-            }, error: function(result,ts,err) {
-                console.log([result,ts,err]);
-            }
-        });
-        
-    });
-    $(".filter").click(function(e) {
-        e.preventDefault();
-        console.log("filtering");
-        var filter = $(this).attr('id');
-        $.ajax({
-            url: '/cgi-bin/index.cgi/filter',
-            async: false,
-            type: 'POST',
-            dataType: 'json',
-            contentType: 'application/json; charset=UTF-8',
-            data:"filter="+filter,
-            success: function(response) {
-                console.log(response);
-				display_courses(response);
-            }, error: function(result,ts,err) {
-                console.log(result);
-                console.log([result,ts,err]);
-            }
-        });
-        
-    });
-
-	$("#loginButton" ).click(function(e) {
-        e.preventDefault();
-		var username = document.getElementById("username").value;
-		var password = document.getElementById("password").value;
-        console.log("username: "+username);
-        console.log("password: "+password);
-        $.ajax({
-            url: '/cgi-bin/index.cgi/login',
-            async: false,
-            type: 'POST',
-            dataType: 'json',
-            contentType: 'application/json',
-            data: JSON.stringify({"user":username, "pass":password}),
-            success: function(response) {
-				console.log("login success");
-				//login_success();
-            }, error: function(result,ts,err) {
-				console.log("login failed");
-                console.log([result,ts,err]);
-            }
-        });
-    });
-
-	$("#register-submit").click(function(e) {
-        e.preventDefault();
-
-        $("#signupModal .form-feedback").removeClass('invalid');
-
-        var password = $("#signupModal input[name=password]").val()
-        var passwordConfirm = $("#signupModal input[name=confirm-password]").val() 
-        if (password === passwordConfirm) {
-            var data = {
-                user: $("#signupModal input[name=username]").val(),
-                pass: $("#signupModal input[name=password]").val(),
-                name: $("#signupModal input[name=nickname]").val()
-            }
-
-            $.ajax({
-                url: '/cgi-bin/index.cgi/signup',
-                type: 'POST',
-                dataType: 'json',
-                contentType: 'application/json',
-                data: JSON.stringify(data),
-                success: function(response) {
-                    if (response.success) {
-                        $("#signupModal").trigger('click');
-                    } else {
-                        $("#signupModal .form-feedback").html(response.message);
-                        $("#signupModal .form-feedback").addClass("invalid");
-                    }
-                }, error: function(result,st,err) {
-                    console.log("login failed");
-                    console.log([result,st,err]);
-                }
-            });
-        } else {
-            $("#signupModal .form-feedback").html("Passwords do not match!");
-            $("#signupModal .form-feedback").addClass("invalid");
-        }
-    });
-});

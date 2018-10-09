@@ -14,6 +14,7 @@
 		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
         <script src="reviews.js"></script>
         <script src="main.js"></script>
+        <script src="ajaxpy.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 	</head>
@@ -48,7 +49,7 @@
         <a class="nav-link disabled" href="#">Contact</a>
       </li>
     </ul>
-    <form id="searchForm" class="form-inline my-2 my-lg-0" method="post" accept-charset="utf-8">
+    <form id="searchForm" class="form-inline my-2 my-lg-0" method="post">
 	  <input id="searchField" name="searchfield" class="form-control mr-sm-2" type="text" placeholder="Course name / code">
 	  <button type="submit" id="searchButton" class="btn btn-light my-2 my-sm-0 mr-2">Search</button>
     </form>
