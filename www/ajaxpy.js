@@ -179,6 +179,25 @@ $(document).ready(function(){
             data: JSON.stringify({"user":username, "pass":password}),
             success: function(response) {
 				console.log("login success");
+				console.log(response);
+				if(response.success)
+				{
+					/* TODO: Set a browser cookie here so we can track sessions, maybe just set a hidden element to the
+					session token temporarily? */
+					var login_button = document.getElementById("login_button");
+					var signup_button = document.getElementById("signupButton");
+					login_button.setAttribute("style", 'display:none');
+					signup_button.setAttribute("style", 'display:none');
+
+					document.getElementById("username_runnup").setAttribute("style", "display:block");
+					var username_text = document.getElementById("username_text");
+					username_text.innerHTML = username;
+					username_text.setAttribute("style", "display:block");
+
+					document.getElementById("username_runnup").setAttribute("style", "display:block");
+
+					document.getElementById("logoutButton").setAttribute("style", "display:block");
+				}
 				//login_success();
             }, error: function(result,ts,err) {
 				console.log("login failed");

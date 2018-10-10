@@ -54,8 +54,12 @@
 	  <input id="searchField" name="searchfield" class="form-control mr-sm-2" type="text" placeholder="Course name / code">
 	  <button type="submit" id="searchButton" class="btn btn-light my-2 my-sm-0 mr-2">Search</button>
     </form>
-	<button class="btn btn-light my-2 my-sm-0 mr-2" data-toggle="modal" data-target="#loginModal">Login</button>
+	<button id="login_button" class="btn btn-light my-2 my-sm-0 mr-2" data-toggle="modal" data-target="#loginModal">Login</button>
 	<button id="signupButton" class="btn btn-light my-2 my-sm-0 mr-2" data-toggle="modal" data-target="#signupModal">Register</button>
+	<button id="logoutButton" class="btn btn-light my-2 my-sm-0 mr-2" style="display:none">Logout</button>
+	<span class="text-light mr-1" id="username_runnup" style="display:none">Signed in as</span>
+	<span class="text-light" id="username_text" style="display:none"></span>
+
 
   <div class ="modal" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="loginModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
