@@ -11,7 +11,7 @@ function appendRating(rating)
 			irating.setAttribute('class', 'fas fa-star star-rating');
 		else
 			irating.setAttribute('class', 'far fa-star star-rating-empty');
-			
+
 		rating--;
 	}
 	crating.setAttribute('class', 'ml-2');
@@ -133,8 +133,8 @@ function reviewForm(k)
     var div = document.createElement('div');
     div.setAttribute('class', "collapse");
     div.id    = "reviewDiv"+k.toString();
-   
-   
+
+
     var f = document.createElement("form");
     f.setAttribute('method',"post");
     f.setAttribute('action',"form.js");
@@ -174,7 +174,7 @@ function reviewForm(k)
     var s = document.createElement("input");
     s.type = "submit";
     s.value = "Submit";
-   
+
     // add all elements to the form
     var p = document.createElement('p');
     f.appendChild(p);
@@ -182,18 +182,25 @@ function reviewForm(k)
     f.appendChild(i);
     p = document.createElement('p');
     f.appendChild(p);
-    
+
     f.appendChild(document.createTextNode("Rate the course:  "))
     f.appendChild(r);
 	p = document.createElement('p');
     f.appendChild(p);
-    
+
+	// Text cleaning here
+		var reviewText = review.val();
+		var Filter = require('bad-words'),
+	    filter = new Filter();
+		var reviewCleaned = filter.clean(reviewText);
+		review.val(reviewCleaned);
+
     f.appendChild(review);
     p = document.createElement('p');
-    f.appendChild(p); 
+    f.appendChild(p);
 
     f.appendChild(s);
-    
+
     div.appendChild(f);
     return div;
 
@@ -209,7 +216,7 @@ function main()
 
     // Review form
         var course_list = document.getElementsByClassName("course_summary");
-    
+
     for(var k = 0; k<course_list.length;k++){
         var tog_rev = document.createElement('button');
         tog_rev.type = 'submit';
@@ -219,7 +226,7 @@ function main()
         tog_rev.textContent = "Review";
         tog_rev.setAttribute('class', "btn btn-info btn-lg");
         var node = course_list[k];
-        node.insertBefore(tog_rev,node.childNodes[2]); 
+        node.insertBefore(tog_rev,node.childNodes[2]);
         node.insertBefore(reviewForm(k),node.childNodes[2]);
 
 
