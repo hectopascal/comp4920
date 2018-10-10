@@ -197,6 +197,10 @@ $(document).ready(function(){
 					document.getElementById("username_runnup").setAttribute("style", "display:block");
 
 					document.getElementById("logoutButton").setAttribute("style", "display:block");
+					// This cookie will exist until the browser closes */
+//					document.cookie = "username="+username.toString()+";session_token="+response.token.toString();
+					document.cookie = "username="+username.toString();
+					document.cookie = "session="+response.token.toString();
 				}
 				//login_success();
             }, error: function(result,ts,err) {

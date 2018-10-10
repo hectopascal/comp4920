@@ -9,6 +9,7 @@ import os
 import sys
 import urllib2
 import hashlib
+import uuid
 
 app = Flask(__name__)
 #sys.stderr = sys.stdout
@@ -397,9 +398,7 @@ def login_verify():
       cur.execute('SELECT password, salt FROM users WHERE username = %s;', (username,))
       exist = cur.fetchall()
 
-      # close the connection to the postgresql database
-      cur.close()
-      conn.close()
+
 
       # if [] is returned, it means the user does not exist
       if not exist:
@@ -414,8 +413,22 @@ def login_verify():
       h.update(password.encode(encoding='utf8'))
       
       if pwd_hash == h.hexdigest():
-         return json.dumps({'success':True}), 200, {'ContentType':'application/json'} 
+         session_tok = uuid.uuid1()
 
+         sql = "UPDATE users SET token='%s' WHERE username='%s';" % (str(session_tok), username)
+
+         cur.execute(sql)
+         conn.commit()
+
+         # close the connection to the postgresql database
+         cur.close()
+         conn.close()
+
+         return json.dumps({'success':True, "token":str(session_tok) }), 200, {'ContentType':'application/json'} 
+
+      # close the connection to the postgresql database
+      cur.close()
+      conn.close()
       return json.dumps({'success':False}), 200, {'ContentType':'application/json'} 
 
    except (Exception, psycopg2.DatabaseError) as error:
