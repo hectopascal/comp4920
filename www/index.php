@@ -54,7 +54,7 @@
 	  <input id="searchField" name="searchfield" class="form-control mr-sm-2" type="text" placeholder="Course name / code">
 	  <button type="submit" id="searchButton" class="btn btn-light my-2 my-sm-0 mr-2">Search</button>
     </form>
-	<button id="loginButton" class="btn btn-light my-2 my-sm-0 mr-2" data-toggle="modal" data-target="#loginModal">Login</button>
+	<button class="btn btn-light my-2 my-sm-0 mr-2" data-toggle="modal" data-target="#loginModal">Login</button>
 	<button id="signupButton" class="btn btn-light my-2 my-sm-0 mr-2" data-toggle="modal" data-target="#signupModal">Register</button>
 
   <div class ="modal" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="loginModalLabel" aria-hidden="true">
@@ -76,7 +76,7 @@
 		</div>
 		<div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-		  <button type="button" class="btn btn-primary">Login</button>
+		  <button id="loginButton" type="button" class="btn btn-primary">Login</button>
 		</div>
       </div>
 	</div>
