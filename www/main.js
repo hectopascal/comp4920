@@ -189,11 +189,11 @@ function reviewForm(k)
     f.appendChild(p);
 
 	// Text cleaning here
-		var reviewText = review.val();
+		var reviewText = review.value;
 		var Filter = require('bad-words'),
 	    filter = new Filter();
 		var reviewCleaned = filter.clean(reviewText);
-		review.val(reviewCleaned);
+		review.value= reviewCleaned;
 
     f.appendChild(review);
     p = document.createElement('p');
