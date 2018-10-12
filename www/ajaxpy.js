@@ -122,6 +122,66 @@ function showReviewListener()
 	});
 }
 
+function appear_loggedin(username)
+{
+	var login_button = document.getElementById("login_button");
+	var signup_button = document.getElementById("signupButton");
+	login_button.setAttribute("style", 'display:none');
+	signup_button.setAttribute("style", 'display:none');
+
+	document.getElementById("username_runnup").setAttribute("style", "display:block");
+	var username_text = document.getElementById("username_text");
+	username_text.innerHTML = username;
+	username_text.setAttribute("style", "display:block");
+
+	document.getElementById("username_runnup").setAttribute("style", "display:block");
+
+	document.getElementById("logoutButton").setAttribute("style", "display:block");
+}
+
+/* authenticates an existing session via cookie token */
+function try_authenticate()
+{
+	var username, session_token;
+	if(document.cookie.length == 0) return;
+	var cookie_dat = document.cookie.split('; ');
+
+	for(i = 0; i < cookie_dat.length; i++)
+	{
+		var arr = cookie_dat[i].split('=');
+
+		if(arr[0] === 'username')
+			username = arr[1];
+		else if(arr[0] === 'session')
+			session_token = arr[1];
+	}
+
+	$.ajax({
+		url: '/cgi-bin/index.cgi/authenticate',
+		async: false,
+		type: 'POST',
+		dataType: 'json',
+		contentType: 'application/json',
+		data: JSON.stringify({"user":username, "session":session_token}),
+		success: function(response) {
+			if(response.success)
+			{
+				console.log('cookie authentication success');
+				appear_loggedin(username);
+				return true;
+			}
+			else
+			{
+				console.log('cookie authentication failure');
+				return false;
+			}
+		}, error: function(result,ts,err) {
+			console.log('cookie authentication error');
+			console.log([result,ts,err]);
+		}
+	});
+}
+
 $(document).ready(function(){
 	$(window).scroll(function() { //if scrolled to bottom, ajax post and buffer more
 		if ((window.innerHeight + window.pageYOffset) >= document.body.offsetHeight && hitbottom){
@@ -182,23 +242,8 @@ $(document).ready(function(){
 				console.log(response);
 				if(response.success)
 				{
-					/* TODO: Set a browser cookie here so we can track sessions, maybe just set a hidden element to the
-					session token temporarily? */
-					var login_button = document.getElementById("login_button");
-					var signup_button = document.getElementById("signupButton");
-					login_button.setAttribute("style", 'display:none');
-					signup_button.setAttribute("style", 'display:none');
-
-					document.getElementById("username_runnup").setAttribute("style", "display:block");
-					var username_text = document.getElementById("username_text");
-					username_text.innerHTML = username;
-					username_text.setAttribute("style", "display:block");
-
-					document.getElementById("username_runnup").setAttribute("style", "display:block");
-
-					document.getElementById("logoutButton").setAttribute("style", "display:block");
+					appear_loggedin(username);
 					// This cookie will exist until the browser closes */
-//					document.cookie = "username="+username.toString()+";session_token="+response.token.toString();
 					document.cookie = "username="+username.toString();
 					document.cookie = "session="+response.token.toString();
 				}

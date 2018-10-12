@@ -319,6 +319,8 @@ function main()
 {
 	offset = 0;
 	curpage = MAIN;
+	try_authenticate();
+	/* Try authenticating with cookie if there is one */
 	$.ajax({
 		url: '/cgi-bin/index.cgi/courses',
 		async: false,
