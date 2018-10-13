@@ -201,6 +201,92 @@ function showReviewListener()
 	});
 }
 
+function appear_loggedin(username)
+{
+	var login_button = document.getElementById("login_button");
+	var signup_button = document.getElementById("signupButton");
+	login_button.setAttribute("style", 'display:none');
+	signup_button.setAttribute("style", 'display:none');
+
+	document.getElementById("username_runnup").setAttribute("style", "display:block");
+	var username_text = document.getElementById("username_text");
+	username_text.innerHTML = username;
+	username_text.setAttribute("style", "display:block");
+
+	document.getElementById("username_runnup").setAttribute("style", "display:block");
+
+	document.getElementById("logoutButton").setAttribute("style", "display:block");
+}
+
+function appear_loggedout()
+{
+	var login_button = document.getElementById("login_button");
+	var signup_button = document.getElementById("signupButton");
+	login_button.setAttribute("style", 'display:block');
+	signup_button.setAttribute("style", 'display:block');
+
+	document.getElementById("username_runnup").setAttribute("style", "display:none");
+	var username_text = document.getElementById("username_text");
+	username_text.setAttribute("style", "display:none");
+
+	document.getElementById("username_runnup").setAttribute("style", "display:none");
+
+	document.getElementById("logoutButton").setAttribute("style", "display:none");
+}
+
+function get_cookie_dat()
+{
+	var username, session_token;
+	var cookie_dat = document.cookie.split('; ');
+
+	for(i = 0; i < cookie_dat.length; i++)
+	{
+		var arr = cookie_dat[i].split('=');
+
+		if(arr[0] === 'username')
+			username = arr[1];
+		else if(arr[0] === 'session')
+			session_token = arr[1];
+	}
+
+	return [ username, session_token ];
+}
+
+/* authenticates an existing session via cookie token */
+function try_authenticate()
+{
+	var cookie_dat;
+	if(document.cookie.length == 0) return;
+	cookie_dat = get_cookie_dat();
+	if(cookie_dat[0] === '' || cookie_dat[1] === '')
+		return false;
+
+	$.ajax({
+		url: '/cgi-bin/index.cgi/authenticate',
+		async: false,
+		type: 'POST',
+		dataType: 'json',
+		contentType: 'application/json',
+		data: JSON.stringify({"user":cookie_dat[0], "session":cookie_dat[1]}),
+		success: function(response) {
+			if(response.success)
+			{
+				console.log('cookie authentication success');
+				appear_loggedin(cookie_dat[0]);
+				return true;
+			}
+			else
+			{
+				console.log('cookie authentication failure');
+				return false;
+			}
+		}, error: function(result,ts,err) {
+			console.log('cookie authentication error');
+			console.log([result,ts,err]);
+		}
+	});
+}
+
 $(document).ready(function(){
 	$(window).scroll(function() { //if scrolled to bottom, ajax post and buffer more
 		if ((window.innerHeight + window.pageYOffset) >= document.body.offsetHeight && hitbottom){
@@ -263,23 +349,8 @@ $(document).ready(function(){
 				console.log(response);
 				if(response.success)
 				{
-					/* TODO: Set a browser cookie here so we can track sessions, maybe just set a hidden element to the
-					session token temporarily? */
-					var login_button = document.getElementById("login_button");
-					var signup_button = document.getElementById("signupButton");
-					login_button.setAttribute("style", 'display:none');
-					signup_button.setAttribute("style", 'display:none');
-
-					document.getElementById("username_runnup").setAttribute("style", "display:block");
-					var username_text = document.getElementById("username_text");
-					username_text.innerHTML = username;
-					username_text.setAttribute("style", "display:block");
-
-					document.getElementById("username_runnup").setAttribute("style", "display:block");
-
-					document.getElementById("logoutButton").setAttribute("style", "display:block");
+					appear_loggedin(username);
 					// This cookie will exist until the browser closes */
-//					document.cookie = "username="+username.toString()+";session_token="+response.token.toString();
 					document.cookie = "username="+username.toString();
 					document.cookie = "session="+response.token.toString();
 				}
@@ -290,6 +361,31 @@ $(document).ready(function(){
             }
         });
     });
+
+	$("#logoutButton").click(function(e) {
+		e.preventDefault();
+		cookie_dat = get_cookie_dat();
+        $.ajax({
+            url: '/cgi-bin/index.cgi/logout',
+            async: false,
+            type: 'POST',
+            dataType: 'json',
+            contentType: 'application/json',
+            data: JSON.stringify({"user":cookie_dat[0], "session":cookie_dat[1]}),
+            success: function(response) {
+				if(response.success)
+				{
+					appear_loggedout();
+					// This cookie will exist until the browser closes
+					document.cookie = "username=";
+					document.cookie = "session=";
+				}
+            }, error: function(result,ts,err) {
+				console.log("logout failed");
+                console.log([result,ts,err]);
+            }
+        });
+	});
 
 	$("#register-submit").click(function(e) {
         e.preventDefault();

@@ -371,6 +371,78 @@ def signup():
         }
     )
 
+@app.route('/authenticate', methods=['POST'])
+def authenticate():
+	data = request.get_json()
+	username = data.get('user', '')
+	session_token = data.get('session', '')
+
+	conn = None
+	exist = None
+
+	try:
+		# connect to the PostgreSQL database
+		conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com", 
+			database = "cs4920", 
+			user = "gill", 
+			password = "gill")
+
+		cur = conn.cursor()
+		cur.execute("SELECT * FROM users WHERE username='%s' AND token='%s'" % (username, session_token))
+		exist = cur.fetchall()
+
+		cur.close()
+		conn.close()
+	except (Exception, psycopg2.DatabaseError) as error:
+		print(error,file=sys.stderr)
+
+		if conn is not None:
+			conn.close()
+		return "Error Error Error !!!"
+
+	if not exist:
+		return json.dumps({'success':False}), 200, {'ContentType':'application/json'} 
+	else:
+		return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
+
+@app.route('/logout', methods=['POST'])
+def logout():
+	data = request.get_json()
+	username = data.get('user', '')
+	session_token = data.get('session', '')
+
+	conn = None
+	exist = None
+
+	try:
+		# connect to the PostgreSQL database
+		conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com", 
+			database = "cs4920", 
+			user = "gill", 
+			password = "gill")
+
+		cur = conn.cursor()
+		cur.execute("SELECT * FROM users WHERE username='%s' AND token='%s'" % (username, session_token))
+		exist = cur.fetchall()
+		if exist:
+			cur.execute("UPDATE users SET token='%s' WHERE username='%s';" % ('', username))
+			conn.commit()
+			
+
+		cur.close()
+		conn.close()
+	except (Exception, psycopg2.DatabaseError) as error:
+		print(error,file=sys.stderr)
+
+		if conn is not None:
+			conn.close()
+		return "Error Error Error !!!"
+
+	if not exist:
+		return json.dumps({'success':False}), 200, {'ContentType':'application/json'} 
+	else:
+		return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
+
 @app.route('/login', methods=['POST'])
 def login_verify():
 
@@ -526,6 +598,57 @@ def completed_courses():
 
 
 
+@app.route('/adminPage', methods=['POST'])
+def adminPage():
+
+   # TODO: change the sql so that it only displays "inappropriate" reviews
+   sql = 'SELECT id, course, author, feedback FROM reviews ORDER BY id;'
+   data = None
+
+   reviews = queryDatabase(sql, data)
+   return json.dumps(reviews)
+
+
+@app.route('/deletePost', methods=['POST'])
+def deletePost():
+
+   # get the post_id from the json object parsed
+   data = request.get_json()
+   post_id = data.get('post_id', '')
+
+   if post_id == '':
+      return json.dumps({'success': "Deleted ?: 0"}), 200, {'ContentType':'application/json'} 
+  
+   conn = None
+   cur = None
+   deleted = '0'
+
+   try:
+      # connect to the PostgreSQL database
+      conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com", 
+                              database = "cs4920", 
+                              user = "gill", 
+                              password = "gill")
+
+      # create a new cursor and Delete the post with id == post_id
+      cur = conn.cursor()
+      cur.execute('DELETE FROM reviews WHERE id = %s;', (post_id,))
+
+      # deleted - whether or not the post is deleted (0:NO , 1:YES)
+      deleted = cur.statusmessage[-1]
+      conn.commit()
+
+   except psycopg2.Error as e:
+      print(e, file=sys.stderr)
+
+   finally:
+      if cur is not None:
+         cur.close()
+
+      if conn is not None:
+         conn.close()
+
+   return json.dumps({'success': "Deleted ?: " + deleted}), 200, {'ContentType':'application/json'} 
 
 if __name__ == '__main__':
    app.run()
