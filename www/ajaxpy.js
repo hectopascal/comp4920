@@ -1,6 +1,6 @@
-function post_courses(type,query){
+function post_courses(type,query,containerId='main_body'){
     var limit = 10;
-    if(type==MAIN){
+    if(type === MAIN){
         $.ajax({
             url: '/cgi-bin/index.cgi/courses',
             async: false,
@@ -18,7 +18,7 @@ function post_courses(type,query){
             }
         });
     	   
-    } else if (type == SEARCH){
+    } else if (type === SEARCH){
         $.ajax({
             url: '/cgi-bin/index.cgi/search',
             async: false,
@@ -39,17 +39,21 @@ function post_courses(type,query){
             }
         }); 
         
-    } else if (type ==FILTER){
+    } else if (type === FILTER){
+        var data = JSON.stringify({'term':query, 'offset':offset});
+        
+        if(containerId!='main_body'){
+            data = JSON.stringify({'term':query, 'offset':offset, 'exact':'0'});
+        }
         $.ajax({
             url: '/cgi-bin/index.cgi/filter',
             async: false,
             type: 'POST',
             dataType: 'json',
             contentType: 'application/json; charset=UTF-8',
-            data: JSON.stringify({'term':query, 'offset':offset}),
+            data: data,
             success: function(response) {
-				display_courses(response);
-				
+				display_courses(response,containerId);
                 last_query = query;
 				curpage = FILTER;
                 offset+=limit;
@@ -59,10 +63,74 @@ function post_courses(type,query){
                 console.log([result,ts,err]);
             }
         });
+    } else if (type === COMPLETE){
+        var data = JSON.stringify({'term':query, 'user':1});
+        
+        $.ajax({
+            url: '/cgi-bin/index.cgi/completedcourses',
+            async: false,
+            type: 'POST',
+            dataType: 'json',
+            contentType: 'application/json; charset=UTF-8',
+            data: data,
+            success: function(response) {
+                console.log((response));
+                complete = response.splice(-1,1);
+                display_courses(response,containerId,complete);
+				curpage = COMPLETE;
+                hitbottom=false;
+            }, error: function(result,ts,err) {
+                console.log(result);
+                console.log([result,ts,err]);
+            }
+        });
+
+    } else if (type === ADDCOMP || type === DELCOMP){
+        var data = JSON.stringify({'course':query, 'user':1, 'type':'ADD'});
+        if(type === DELCOMP){
+            data = JSON.stringify({'course':query, 'user':1, 'type':'DEL'});
+        }
+        $.ajax({
+            url: '/cgi-bin/index.cgi/addcompleted',
+            async: false,
+            type: 'POST',
+            dataType: 'json',
+            contentType: 'application/json; charset=UTF-8',
+            data: data,
+            success: function(response) {
+                console.log((response));
+                hitbottom=false;
+            }, error: function(result,ts,err) {
+                console.log(result);
+                console.log([result,ts,err]);
+            }
+        });
+
     }
+
 
 }
 document.addEventListener("DOMContentLoaded", main);
+function addCompletedListener(c_code,checked){
+    $("#add_"+c_code).click(function() {
+        var course = $(this).attr('id').split('_')[1];
+        console.log(course);
+        var buttontext = document.createTextNode("Uncompleted");
+        if(checked ===false){
+            post_courses(ADDCOMP,course);
+            var buttontext = document.createTextNode("Completed");
+            checked = true;
+        } else{
+            post_courses(DELCOMP,course);
+            checked = false;
+        }
+
+        $(this).empty();
+        $(this).append(buttontext);
+        $(this).toggleClass('btn-default btn-success ');
+    });
+
+}
 function submitReviewListener(){
     $(".submitReview" ).click(function(e) {
         e.preventDefault();
@@ -97,7 +165,18 @@ function submitReviewListener(){
 
     });
 }
+function searchCourseCodeListener(){
+     
+    $("#codesearchbutton").click(function(e) {
+        var search = $('#searchcode').val();
+        console.log(search);
+        clear_children("results_container");
+        offset=0;
+        e.preventDefault();
+        post_courses(COMPLETE,search,'results_container');      
+    });
 
+}
 function showReviewListener()
 {
 	$('.showReviews').click(function(e) {
@@ -144,13 +223,15 @@ $(document).ready(function(){
             return $('#popover-content').html();
         }
     });
-
+    $('#useradd').click(function(e){
+        changeTo_addCoursesPage();
+    });
     $('#review-success').hide();
     $('#review-failure').hide();
     $("#searchButton" ).click(function(e) {
         var search = $('#searchField').val();
         offset=0;
-		clear_main();
+		clear_children('main_body');
         e.preventDefault();
         post_courses(SEARCH,search);      
     });
@@ -158,7 +239,7 @@ $(document).ready(function(){
     $(".filter").click(function(e) {
         var filter = $(this).attr('id');
         offset=0;
-		clear_main();
+		clear_children('main_body');
         e.preventDefault();
         post_courses(FILTER,filter);
         

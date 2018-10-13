@@ -1,13 +1,3 @@
-var offset=0;
-const MAIN = 0;
-const SEARCH = 1;
-const FILTER = 2;
-
-var curpage = MAIN;
-var last_query = '';
-var hitbottom= true;
-
-
 function appendRating(rating)
 {
 	var crating = document.createElement('span');
@@ -61,7 +51,8 @@ function appendPost(user_title, rating, post,pId, score)
 }
 
 function appendCourse(c_code, c_title, c_faculty, c_school, c_study_level,
-	c_terms, c_campus, c_hours, c_info, rating, c_num_reviews)
+	c_terms, c_campus, c_hours, c_info, rating, c_num_reviews,
+    type = 'reviews')
 {
 	var celem  = document.createElement('div');
 	var cflex  = document.createElement('div');
@@ -101,95 +92,129 @@ function appendCourse(c_code, c_title, c_faculty, c_school, c_study_level,
     reviewCount.innerHTML = '(' + c_num_reviews + ')';
     reviewCount.setAttribute('style', 'margin-left: 5px;');
     cflex.appendChild(reviewCount);
+	if (type == 'addcourses'){
+        var rightdiv = document.createElement('div');
+        rightdiv.setAttribute('class','ml-3');
+        var addButton = document.createElement('button');
+        addButton.setAttribute('class',"btn btn-default");
+        addButton.id="add_"+c_code;
+        addButton.appendChild(document.createTextNode("Uncompleted"));
+        rightdiv.appendChild(addButton);
+        cflex.appendChild(rightdiv);
+    }
 
-	var ccomments = document.createElement('div');
-	var load_prompt = document.createElement('button');
-	var load_prompt_i = document.createElement('i');
-	load_prompt.setAttribute('type', 'submit');
-	load_prompt.setAttribute('class', 'btn btn-default showReviews');
-	load_prompt.setAttribute('data-toggle', 'collapse');
-	load_prompt.setAttribute('href', '#' + c_code + '_forum');
-	load_prompt.setAttribute('role', 'button');
-	load_prompt.setAttribute('aria-expanded', 'false');
-	load_prompt.setAttribute('aria-controls', c_code + '_forum');
-	load_prompt.setAttribute('course', c_code);
-	load_prompt.setAttribute('toggled', 'n');
+    if (type == 'reviews'){
+        var ccomments = document.createElement('div');
+        var load_prompt = document.createElement('button');
+        var load_prompt_i = document.createElement('i');
+        load_prompt.setAttribute('type', 'submit');
+        load_prompt.setAttribute('class', 'btn btn-default showReviews');
+        load_prompt.setAttribute('data-toggle', 'collapse');
+        load_prompt.setAttribute('href', '#' + c_code + '_forum');
+        load_prompt.setAttribute('role', 'button');
+        load_prompt.setAttribute('aria-expanded', 'false');
+        load_prompt.setAttribute('aria-controls', c_code + '_forum');
+        load_prompt.setAttribute('course', c_code);
+        load_prompt.setAttribute('toggled', 'n');
 
-	load_prompt_i.setAttribute('class', 'fas fa-chevron-down');
+        load_prompt_i.setAttribute('class', 'fas fa-chevron-down');
 
-	load_prompt.appendChild(load_prompt_i);
+        load_prompt.appendChild(load_prompt_i);
 
-	var collapsing_forum = document.createElement('div');
-	var ttt  = document.createTextNode('I did not enjoy this course.');
-	collapsing_forum.setAttribute('class', 'collapse');
-	collapsing_forum.setAttribute('id', c_code + '_forum');
+        var collapsing_forum = document.createElement('div');
+        var ttt  = document.createTextNode('I did not enjoy this course.');
+        collapsing_forum.setAttribute('class', 'collapse');
+        collapsing_forum.setAttribute('id', c_code + '_forum');
 
-	load_prompt.addEventListener('click', function()
-		{
-			this.classList.toggle('active');
+        load_prompt.addEventListener('click', function()
+        {
+            this.classList.toggle('active');
 
-			if(this.getAttribute('toggled') === 'y')
-			{
+            if(this.getAttribute('toggled') === 'y')
+            {
 
-				this.setAttribute('toggled', 'n');
-				this.children[0].setAttribute('class', 'fas fa-chevron-down');
-			}
-			else
-			{
-				this.setAttribute('toggled', 'y');
-				this.children[0].setAttribute('class', 'fas fa-chevron-up');
-			}
-		});
+                this.setAttribute('toggled', 'n');
+                this.children[0].setAttribute('class', 'fas fa-chevron-down');
+            }
+            else
+            {
+                this.setAttribute('toggled', 'y');
+                this.children[0].setAttribute('class', 'fas fa-chevron-up');
+            }
+        });
 
-	ccomments.appendChild(load_prompt);
-	ccomments.setAttribute('class', 'd-flex justify-content-center mt-2 mb-2');
+        ccomments.appendChild(load_prompt);
+        ccomments.setAttribute('class', 'd-flex justify-content-center mt-2 mb-2');
 
 
-	celem.appendChild(ccomments);
-	celem.appendChild(collapsing_forum);
+        celem.appendChild(ccomments);
+        celem.appendChild(collapsing_forum);
 
+    }
 	celem.setAttribute("class", 'p-3 bg-white course_summary');
 	celem.setAttribute("style", 'margin-top:20px;margin-bottom:20px; box-shadow:0 0 4px 0 rgba(0,0,0,0.2); border-radius:10px;');
     celem.setAttribute("id",c_code);
-	document.getElementById('main_body').appendChild(celem);
+    return celem;
 }
-
-function clear_main(){
-    
-    var main = document.getElementById('main_body');
-    while(main.firstChild){
-        main.removeChild(main.firstChild);
-    }
-
-
-}
-function display_courses(results){
-    if(results !== ""){
+function display_courses(results,containerId='main_body',complete=false){
+	var container = document.getElementById(containerId);
+    console.log(complete);
+    if(results.length !== 0){
         //console.log(results);
         //var courses = JSON.parse(results);
+
         for (var i = 0 ; i < results.length; i++){
             var rating = results[i][4];
-            
+
             var c_code = results[i][1]; 
             if(!document.getElementById(c_code)){
-                appendCourse(c_code, results[i][2], "Faculty of Engineering", "School of Computer Science", "UGRD", 1 , 'Kensington', 6, results[i][3], rating, results[i][5]);
+                var type = 'reviews';
+                if (containerId === 'results_container'){
+                    type = 'addcourses';
+                }
+                container.appendChild(appendCourse(c_code, results[i][2], "Faculty of Engineering", "School of Computer Science", "UGRD", 1 , 'Kensington', 6, results[i][3], rating, results[i][5],type));
                 //insert review section
-                var tog_rev = document.createElement('button');
-                tog_rev.type = 'submit';
-                tog_rev.setAttribute('data-toggle','collapse');
-                tog_rev.setAttribute('data-target', '#reviewDiv'+c_code);
-                tog_rev.textContent = "Review";
-                tog_rev.setAttribute('class',  "tog_rev btn btn-info btn-lg");
-                var node = document.getElementById(c_code);
-                node.insertBefore(reviewForm(c_code),node.childNodes[2]);
-                node.insertBefore(tog_rev,node.childNodes[2]);        
+                if(containerId==='results_container' ){
+                    var checked = false;
+                    if(complete[0][0][0] === true){
+                        var button = document.getElementById('add_'+c_code);
+                        button.classList.remove('btn-default');
+                        button.removeChild(button.firstChild);
+
+                        button.appendChild(document.createTextNode("Completed"));
+                        button.classList.add('btn-success');
+                        var checked = true;
+                    }
+                    addCompletedListener(c_code,checked);
+               
+                } else{
+                    var tog_rev = document.createElement('button');
+                    tog_rev.type = 'submit';
+                    tog_rev.setAttribute('data-toggle','collapse');
+                    tog_rev.setAttribute('data-target', '#reviewDiv'+c_code);
+                    tog_rev.textContent = "Review";
+                    tog_rev.setAttribute('class',  "tog_rev btn btn-info btn-lg");
+                    var node = document.getElementById(c_code);
+                    node.insertBefore(reviewForm(c_code),node.childNodes[2]);
+                    node.insertBefore(tog_rev,node.childNodes[2]);        
+
+                }
             }
         }
-        submitReviewListener();
-		showReviewListener();
+        if(containerId==='main_body'){
+            submitReviewListener();
+	    	showReviewListener();
+        }        
     } else {
-        //do nothing
-    }
+        if (containerId=== "results_container"){
+            container.appendChild(document.createElement('p'));
+            container.appendChild(document.createTextNode("No courses found. Please enter exact course code."));
+        } else{
+
+            container.appendChild(document.createElement('p'));
+            container.appendChild(document.createTextNode("No courses matching your query found. Try again?"));
+        }
+    } 
 }
 function getRating(course){
     var rating=0;
@@ -249,7 +274,7 @@ function reviewForm(c_code)
     c.type = "hidden";
     c.name = "course";
     c.value = c_code;
-    c.class = "form-control"
+    c.setAttribute('class',"form-control");
     //----USER DISPLAY NAME----//
     var i = document.createElement("input");
     i.type = "text";
@@ -314,12 +339,17 @@ function reviewForm(c_code)
     return div;
 
 }
+function changeTo_addCoursesPage(){
+    clear_children('main_body');
+    addCoursesPage();
 
+}
 function main()
 {
 	offset = 0;
 	curpage = MAIN;
-	$.ajax({
+	
+    $.ajax({
 		url: '/cgi-bin/index.cgi/courses',
 		async: false,
 		type: 'POST',
@@ -327,7 +357,7 @@ function main()
 		contentType: 'application/json; charset=UTF-8',
         data: JSON.stringify({"limit":10,"offset":offset}),
 		success: function(response) {
-			clear_main();
+			clear_children('main_body');
 			display_courses(response);
             offset+=10;
 		}, error: function(result,ts,err) {

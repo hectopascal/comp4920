@@ -173,15 +173,25 @@ def json_courses():
     records = cur.fetchall()
     return json.dumps(records)
 
+
 @app.route('/filter', methods=['POST'] )
 def filter_course():
     data = request.get_json()
     search_term = data.get('term','')
     offset = data.get('offset','')
-    """ insert a new review """
-    sql = """SELECT * FROM courses 
-            WHERE (LOWER(code) LIKE LOWER('%%'|| %s || '%%'))
-            limit 10 offset %s ; """
+    exact = data.get('exact','')
+    if(exact):
+        offset = '0'
+        sql = """SELECT * FROM courses 
+            WHERE (LOWER(code) LIKE LOWER(%s))
+            limit 10 offset %s; """
+
+    else :
+        """ insert a new review """
+        sql = """SELECT * FROM courses 
+                WHERE (LOWER(code) LIKE LOWER('%%'|| %s || '%%'))
+                limit 10 offset %s ; """
+    
     conn = None
     vendor_id = None
     try:
@@ -438,6 +448,84 @@ def login_verify():
          conn.close()
 
       return "Error Error Error !!!"
+
+
+########### Functions for adding completed courses ###########
+@app.route('/addcompleted', methods=['POST'] )
+def add_completed_course():
+    data = request.get_json()
+    course = data.get('course','')
+    user = data.get('user','')
+    operation = data.get('type')
+    print(course,file=sys.stderr)
+    """ insert a new review """
+    sql = """insert into completed_courses(uid,ccode) 
+                values(%s,UPPER(%s));"""
+    
+    if(operation == 'DEL'):
+        sql=""" DELETE FROM completed_courses where uid=%s and ccode=UPPER(%s);"""
+
+    conn = None
+    vendor_id = None
+    
+    try:
+        # read database configuration
+        # connect to the PostgreSQL database
+        conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com", 
+                           database = "cs4920", 
+                           user = "gill", 
+                           password = "gill")
+        cur = conn.cursor()
+        cur.execute(sql,(user,course))
+        conn.commit() 
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error,file=sys.stderr)
+    finally:
+        if conn is not None:
+            conn.close()
+    return  json.dumps({'success':True}), 200, {'ContentType':'application/json'}
+
+
+@app.route('/completedcourses', methods=['POST'] )
+def completed_courses():
+    data = request.get_json()
+    course = data.get('term','')
+    user = data.get('user','')
+    sql = """SELECT * FROM courses 
+            WHERE (code LIKE UPPER('%s')) ; """
+
+
+    checkcomplete ="""select exists(select 1 from completed_courses where 
+                    uid=%s and ccode=UPPER(%s)) ;"""
+    
+    conn = None
+    vendor_id = None
+    try:
+        conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com", 
+                           database = "cs4920", 
+                           user = "gill", 
+                           password = "gill")
+        cur = conn.cursor()
+        cur.execute(sql % course) 
+        records = cur.fetchall()
+        if (cur.rowcount != 0):
+            cur.execute(checkcomplete,(user,course))
+            records.append(cur.fetchall())
+
+        conn.commit()
+        cur.close()
+        if conn is not None: 
+            conn.close()
+        return json.dumps(records)
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error,file=sys.stderr)
+        if conn is not None:
+            conn.close()
+    return ""
+
+
+
 
 if __name__ == '__main__':
    app.run()
