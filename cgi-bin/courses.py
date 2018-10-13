@@ -401,9 +401,9 @@ def authenticate():
 		return "Error Error Error !!!"
 
 	if not exist:
-		return json.dumps({'success':False}), 200, {'ContentType':'application/json'} 
+		return "" #json.dumps({'success':False}), 200, {'ContentType':'application/json'} 
 	else:
-		return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
+            return json.dumps(exist)
 
 @app.route('/logout', methods=['POST'])
 def logout():
@@ -477,7 +477,7 @@ def login_verify():
       cur = conn.cursor()
       
       # check if the username is used before 
-      cur.execute('SELECT password, salt FROM users WHERE username = %s;', (username,))
+      cur.execute('SELECT password, salt,id FROM users WHERE username = %s;', (username,))
       exist = cur.fetchall()
 
 
@@ -488,7 +488,7 @@ def login_verify():
 
       # Get the salt from the fetched results, then
       # compare stored hash with that of the input password (plus salt)
-      pwd_hash, salt = exist[0] 
+      pwd_hash, salt,uid = exist[0] 
       password += salt            
 
       h = hashlib.sha256()
@@ -506,7 +506,7 @@ def login_verify():
          cur.close()
          conn.close()
 
-         return json.dumps({'success':True, "token":str(session_tok) }), 200, {'ContentType':'application/json'} 
+         return json.dumps({'success':True, "token":str(session_tok),"uid":uid }), 200, {'ContentType':'application/json'} 
 
       # close the connection to the postgresql database
       cur.close()

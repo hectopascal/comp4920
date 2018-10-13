@@ -64,7 +64,7 @@ function post_courses(type,query,containerId='main_body'){
             }
         });
     } else if (type === COMPLETE){
-        var data = JSON.stringify({'term':query, 'user':1});
+        var data = JSON.stringify({'term':query, 'user':userId});
         
         $.ajax({
             url: '/cgi-bin/index.cgi/completedcourses',
@@ -86,9 +86,9 @@ function post_courses(type,query,containerId='main_body'){
         });
 
     } else if (type === ADDCOMP || type === DELCOMP){
-        var data = JSON.stringify({'course':query, 'user':1, 'type':'ADD'});
+        var data = JSON.stringify({'course':query, 'user':userId, 'type':'ADD'});
         if(type === DELCOMP){
-            data = JSON.stringify({'course':query, 'user':1, 'type':'DEL'});
+            data = JSON.stringify({'course':query, 'user':userId, 'type':'DEL'});
         }
         $.ajax({
             url: '/cgi-bin/index.cgi/addcompleted',
@@ -269,17 +269,20 @@ function try_authenticate()
 		contentType: 'application/json',
 		data: JSON.stringify({"user":cookie_dat[0], "session":cookie_dat[1]}),
 		success: function(response) {
-			if(response.success)
-			{
+		
+            //if(response.success) {
+
 				console.log('cookie authentication success');
+                userId=response[0][0];
 				appear_loggedin(cookie_dat[0]);
 				return true;
-			}
+			/*}
 			else
 			{
+                console.log(response);
 				console.log('cookie authentication failure');
 				return false;
-			}
+			}*/
 		}, error: function(result,ts,err) {
 			console.log('cookie authentication error');
 			console.log([result,ts,err]);
@@ -350,6 +353,7 @@ $(document).ready(function(){
 				if(response.success)
 				{
 					appear_loggedin(username);
+                    userId=response.uid;
 					// This cookie will exist until the browser closes */
 					document.cookie = "username="+username.toString();
 					document.cookie = "session="+response.token.toString();
@@ -379,6 +383,7 @@ $(document).ready(function(){
 					// This cookie will exist until the browser closes
 					document.cookie = "username=";
 					document.cookie = "session=";
+                    userId=0;
 				}
             }, error: function(result,ts,err) {
 				console.log("logout failed");
