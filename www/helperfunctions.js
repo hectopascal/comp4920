@@ -8,6 +8,7 @@ var curpage = MAIN;
 var last_query = '';
 var hitbottom= true;
 
+var wait = false;
 var offset=0;
 var userId=0;
 
