@@ -270,19 +270,19 @@ function try_authenticate()
 		data: JSON.stringify({"user":cookie_dat[0], "session":cookie_dat[1]}),
 		success: function(response) {
 		
-            if(response.success) {
+            //if(response.success) {
 
 				console.log('cookie authentication success');
-                userId=cookie_dat[0];
+                userId=response[0][0];
 				appear_loggedin(cookie_dat[0]);
 				return true;
-			}
+			/*}
 			else
 			{
                 console.log(response);
 				console.log('cookie authentication failure');
 				return false;
-			}
+			}*/
 		}, error: function(result,ts,err) {
 			console.log('cookie authentication error');
 			console.log([result,ts,err]);
