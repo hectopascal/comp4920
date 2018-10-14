@@ -59,11 +59,15 @@ class CourseSpider(scrapy.Spider):
 
         # Scrape prereq data as string
         prereq = response.xpath('//div[@id="SubjectConditions"]')
+        prereq_courses = ""
         div_selectors_prereq = prereq.xpath(".//div")
         for div in div_selectors_prereq:
             prereq_text = div.xpath("text()").extract_first()
             if ("Prerequisite:") in prereq_text:
-                print(prereq_text)
+                # print(prereq_text)
+                temp = prereq_text.split(": ")
+                prereq_courses = temp[1]
+                print("this is prereqs: "+prereq_courses)
 
         # Scrape equivalence data as 1 course per line
         # Save as string
@@ -80,7 +84,7 @@ class CourseSpider(scrapy.Spider):
                 equal_i+=1
                 if (equal_i != len(span_selectors_equal)):
                     equal_string = equal_string + ", "
-        print ("this is final equal string: " + equal_string)
+        # print ("this is final equal string: " + equal_string)
 
         # scrape exclusion data as 1 course per line
         # Save as string
@@ -100,4 +104,51 @@ class CourseSpider(scrapy.Spider):
                 if (excln_i < len(span_selectors_excln)):
                     excln_string = excln_string + ", "
                 # print("***" + excln_string + "***")
-        print ("this is final exclusion string: " + excln_string)
+        # if excln_string:
+            # print ("this is final exclusion string: " + excln_string)
+
+        # Send Prerequisite, equivalence and exclusions to Database
+        # prereq_courses
+        # equal_string
+        # excln_string
+        try:
+            sql_command_prereq = """UPDATE courses SET prereqs = %s WHERE code = %s;"""
+            sql_command_equal = """UPDATE courses SET exclusions = %s WHERE code = %s;"""
+            sql_command_excln = """UPDATE courses SET equivalence = %s WHERE code = %s;"""
+            conn = psycopg2.connect(database="cs4920",user="linda", password="linda", host="cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com")
+            cur = conn.cursor()
+
+            if prereq_courses:
+                try:
+                    cur.execute(sql_command_prereq,(prereq_courses, code))
+                    print("prereq executed: %d" % cur.rowcount)
+
+                except psycopg2.Error:
+                    conn.rollback()
+                else:
+                    conn.commit()
+
+            if excln_string:
+                try:
+                    cur.execute(sql_command_excln,(excln_string, code))
+                    print("exclusion executed: %d" % cur.rowcount)
+                except psycopg2.Error:
+                    conn.rollback()
+                else:
+                    conn.commit()
+
+            if equal_string:
+                try:
+                    cur.execute(sql_command_equal,(equal_string, code))
+                    print("equivalence executed: %d" % cur.rowcount)
+                except psycopg2.Error:
+                    conn.rollback()
+                else:
+                    conn.commit()
+
+            cur.close()
+        except (Exception, psycopg2.DatabaseError) as error:
+            print(error)
+        finally:
+            if conn is not None:
+                conn.close()
