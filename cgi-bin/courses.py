@@ -14,6 +14,35 @@ import uuid
 app = Flask(__name__)
 #sys.stderr = sys.stdout
 
+def check_token(user, token):
+	conn = None
+	exist = None
+
+	try:
+		# connect to the PostgreSQL database
+		conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com", 
+			database = "cs4920", 
+			user = "gill", 
+			password = "gill")
+
+		cur = conn.cursor()
+		cur.execute("SELECT * FROM users WHERE username='%s' AND token='%s'" % (user, token))
+		exist = cur.fetchall()
+
+		cur.close()
+		conn.close()
+	except (Exception, psycopg2.DatabaseError) as error:
+		print(error,file=sys.stderr)
+
+		if conn is not None:
+			conn.close()
+		return False
+
+	if not exist:
+		return False
+	else:
+		return True
+
 def queryDatabase(sql, data, fetchone = False):
     dsn = 'host=%s dbname=%s user=%s password=%s' % (
         'cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com',
@@ -377,33 +406,13 @@ def authenticate():
 	username = data.get('user', '')
 	session_token = data.get('session', '')
 
-	conn = None
-	exist = None
-
-	try:
-		# connect to the PostgreSQL database
-		conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com", 
-			database = "cs4920", 
-			user = "gill", 
-			password = "gill")
-
-		cur = conn.cursor()
-		cur.execute("SELECT * FROM users WHERE username='%s' AND token='%s'" % (username, session_token))
-		exist = cur.fetchall()
-
-		cur.close()
-		conn.close()
-	except (Exception, psycopg2.DatabaseError) as error:
-		print(error,file=sys.stderr)
-
-		if conn is not None:
-			conn.close()
-		return "Error Error Error !!!"
+	exist = check_token(username, session_token) 
 
 	if not exist:
-		return "" #json.dumps({'success':False}), 200, {'ContentType':'application/json'} 
+		return json.dumps({'success':False}), 200, {'ContentType':'application/json'} 
 	else:
-            return json.dumps(exist)
+		return json.dumps({'success':True}), 200, {'ContentType':'application/json'} 
+
 
 @app.route('/logout', methods=['POST'])
 def logout():
