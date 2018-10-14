@@ -44,8 +44,19 @@ function appendPost(user_title, rating, post,pId, score)
     var down = document.createElement('i');
     down.setAttribute("class","fas fa-arrow-down downrev");
 	down.setAttribute('pid',"post_"+pId);
+
+    //TODO
+    var flag = document.createElement('p');
+    flag.setAttribute("class", "flag mr-2 ml-2")
+    flag.setAttribute("pid", "post_" + pId);
+    flag.innerHTML = "Flag";
+
+
     div.appendChild(up);
     div.appendChild(down);
+
+    //TODO
+    div.appendChild(flag);
 
 	return cpost;
 }
@@ -254,6 +265,7 @@ function display_reviews(c_code, results)
 	}
 
     updown_Listener();
+    flag_Listener();
 }
 
 
