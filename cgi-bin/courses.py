@@ -601,23 +601,65 @@ def completed_courses():
 @app.route('/adminPage', methods=['POST'])
 def adminPage():
 
-   # TODO: change the sql so that it only displays "inappropriate" reviews
-   sql = 'SELECT id, course, author, feedback FROM reviews ORDER BY id;'
+   # Returns only "inappropriate" or "flagged" reviews
+   sql = 'SELECT id, course, author, feedback FROM reviews WHERE flagged = TRUE ORDER BY id ;'
    data = None
 
    reviews = queryDatabase(sql, data)
    return json.dumps(reviews)
 
 
+@app.route('/flagPost', methods=['POST'])
+def flagPost():
+   data = request.get_json()
+   post_id = data.get('post', '')
+
+   if post_id == '':
+      return json.dumps({'success': 'Updated ? = 0'}), 200, {'ContentType':'application/json'} 
+   else:
+      _, post_id = post_id.split('_', 1)     
+
+   conn = None
+   cur = None
+   updated = '0'
+
+   try:
+      # connect to the PostgreSQL database
+      conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com", 
+                              database = "cs4920", 
+                              user = "gill", 
+                              password = "gill")
+
+      # create a new cursor and flag the post with id == post_id
+      cur = conn.cursor()
+      cur.execute('UPDATE reviews SET flagged = TRUE WHERE id = %s;', (post_id,))
+
+      # updated - whether or not the post is updated/flagged (0:NO , 1:YES)
+      conn.commit()
+      updated = cur.statusmessage[-1]
+
+   except psycopg2.Error as e:
+      print(e, file=sys.stderr)
+
+   finally:
+      if cur is not None:
+         cur.close()
+
+      if conn is not None:
+         conn.close()
+
+   return json.dumps({'success': "Updated ? = " + updated}), 200, {'ContentType':'application/json'} 
+
+   
 @app.route('/deletePost', methods=['POST'])
 def deletePost():
 
    # get the post_id from the json object parsed
    data = request.get_json()
-   post_id = data.get('post_id', '')
+   post_id = data.get('post', '')
 
    if post_id == '':
-      return json.dumps({'success': "Deleted ?: 0"}), 200, {'ContentType':'application/json'} 
+      return json.dumps({'success': "Deleted ? = 0"}), 200, {'ContentType':'application/json'} 
   
    conn = None
    cur = None
@@ -635,8 +677,8 @@ def deletePost():
       cur.execute('DELETE FROM reviews WHERE id = %s;', (post_id,))
 
       # deleted - whether or not the post is deleted (0:NO , 1:YES)
-      deleted = cur.statusmessage[-1]
       conn.commit()
+      deleted = cur.statusmessage[-1]
 
    except psycopg2.Error as e:
       print(e, file=sys.stderr)
@@ -648,7 +690,9 @@ def deletePost():
       if conn is not None:
          conn.close()
 
-   return json.dumps({'success': "Deleted ?: " + deleted}), 200, {'ContentType':'application/json'} 
+   return json.dumps({'success': "Deleted ? = " + deleted}), 200, {'ContentType':'application/json'} 
+
+
 
 if __name__ == '__main__':
    app.run()
