@@ -160,7 +160,7 @@ function display_courses(results,containerId='main_body',complete=false){
 	var container = document.getElementById(containerId);
     console.log(complete);
     if(results.length !== 0){
-        //console.log(results);
+        console.log(results);
         //var courses = JSON.parse(results);
 
         for (var i = 0 ; i < results.length; i++){
@@ -172,7 +172,10 @@ function display_courses(results,containerId='main_body',complete=false){
                 if (containerId === 'results_container'){
                     type = 'addcourses';
                 }
-                container.appendChild(appendCourse(c_code, results[i][2], "Faculty of Engineering", "School of Computer Science", "UGRD", 1 , 'Kensington', 6, results[i][3], rating, results[i][5],type));
+				if(results[i][6] == "Undergraduate")
+	                container.appendChild(appendCourse(c_code, results[i][2], "Faculty of Engineering", "School of Computer Science", "UGRD", 1 , 'Kensington', 6, results[i][3], rating, results[i][5],type));
+				else
+	                container.appendChild(appendCourse(c_code, results[i][2], "Faculty of Engineering", "School of Computer Science", "PGRD", 1 , 'Kensington', 6, results[i][3], rating, results[i][5],type));
                 //insert review section
                 if(containerId==='results_container' ){
                     var checked = false;

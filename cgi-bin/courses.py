@@ -159,7 +159,8 @@ def json_courses():
             courses.name,
             courses.description,
             cast(avg(reviews.rating) as float),
-            count(reviews.*)
+            count(reviews.*),
+			courses.study_level
         from courses
         left join reviews on courses.code = reviews.course
         group by courses.id, courses.code, courses.name, courses.description
