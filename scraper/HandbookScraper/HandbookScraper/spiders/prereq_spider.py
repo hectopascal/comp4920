@@ -83,6 +83,10 @@ class CourseSpider(scrapy.Spider):
                 if (excln_i < len(span_selectors_excln)):
                     excln_string = excln_string + ", "
 
+        # study_level =  response.xpath('//*[@id="default-page-details-template"]/div[3]/div[2]/div/div/div/div[3]/div[1]/div/div/div[3]/div/p')
+        study_level = response.xpath('//p[@class="enable-helptext"]/text()').extract_first()
+        # print(study_level)
+
         # Send Prerequisite, equivalence and exclusions to Database
         # prereq_courses
         # equal_string
@@ -91,6 +95,7 @@ class CourseSpider(scrapy.Spider):
             sql_command_prereq = """UPDATE courses SET prereqs = %s WHERE code = %s;"""
             sql_command_equal = """UPDATE courses SET exclusions = %s WHERE code = %s;"""
             sql_command_excln = """UPDATE courses SET equivalence = %s WHERE code = %s;"""
+            sql_command_lvl = """UPDATE courses SET study_level = %s WHERE code = %s;"""
             conn = psycopg2.connect(database="cs4920",user="linda", password="linda", host="cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com")
             cur = conn.cursor()
 
@@ -116,6 +121,14 @@ class CourseSpider(scrapy.Spider):
             if equal_string:
                 try:
                     cur.execute(sql_command_equal,(equal_string, code))
+                    print("equivalence executed: %d" % cur.rowcount)
+                except psycopg2.Error:
+                    conn.rollback()
+                else:
+                    conn.commit()
+            if (study_level):
+                try:
+                    cur.execute(sql_command_lvl,(study_level, code))
                     print("equivalence executed: %d" % cur.rowcount)
                 except psycopg2.Error:
                     conn.rollback()
