@@ -269,20 +269,11 @@ function try_authenticate()
 		contentType: 'application/json',
 		data: JSON.stringify({"user":cookie_dat[0], "session":cookie_dat[1]}),
 		success: function(response) {
-		
-            //if(response.success) {
-
-				console.log('cookie authentication success');
-                userId=response[0][0];
-				appear_loggedin(cookie_dat[0]);
-				return true;
-			/*}
-			else
-			{
-                console.log(response);
-				console.log('cookie authentication failure');
-				return false;
-			}*/
+    
+            console.log('cookie authentication success');
+            userId=response[0][0];
+            appear_loggedin(cookie_dat[0]);
+            return true;
 		}, error: function(result,ts,err) {
 			console.log('cookie authentication error');
 			console.log([result,ts,err]);
@@ -313,7 +304,18 @@ $(document).ready(function(){
         }
     });
     $('#useradd').click(function(e){
-        changeTo_addCoursesPage();
+        if(userId!=0){ //logged in
+            changeTo_addCoursesPage();
+        } else { //not logged in!
+			if(!wait){
+				wait=true;
+            	$('<div class="alert alert-warning" role="alert">Login required!</div>').insertBefore('#main_body').delay(3000).fadeOut(function(){
+                    wait = false;
+                    $(this).remove();
+                });
+
+		    }
+        }
     });
     $('#review-success').hide();
     $('#review-failure').hide();
