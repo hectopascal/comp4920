@@ -433,4 +433,60 @@ $(document).ready(function(){
     });
 });
 
+function get_user_info(){
+    $.ajax({
+        url: '/cgi-bin/index.cgi/userinfo',
+        async: false,
+        type: 'POST',
+        dataType: 'json',
+        contentType: 'application/json; charset=UTF-8',
+        data: JSON.stringify({"user":userId}),
+        success: function(response) {
+            user_display_name = response.name;
+            user_email = response.username;
+            hitbottom=false;
+        }, error: function(result,ts,err) {
+            console.log([result,ts,err]);
+        }
+    });
+   
+}
+function get_all_reviewed(){
+    $.ajax({
+        url: '/cgi-bin/index.cgi/allreviewed',
+        async: false,
+        type: 'POST',
+        dataType: 'json',
+        contentType: 'application/json; charset=UTF-8',
+        data: JSON.stringify({"user":userId}),
+        success: function(response) {
+            console.log(response);
+            display_reviewed(response);
+            offset=0;
+            hitbottom=false;
+        }, error: function(result,ts,err) {
+            console.log([result,ts,err]);
+        }
+    });
+   
 
+}
+function get_all_completed(){
+    $.ajax({
+        url: '/cgi-bin/index.cgi/allcompleted',
+        async: false,
+        type: 'POST',
+        dataType: 'json',
+        contentType: 'application/json; charset=UTF-8',
+        data: JSON.stringify({"user":userId}),
+        success: function(response) {
+            console.log(response);
+            display_completed(response);
+            offset=0;
+            hitbottom=false;
+        }, error: function(result,ts,err) {
+            console.log([result,ts,err]);
+        }
+    });
+   
+}

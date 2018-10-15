@@ -350,7 +350,8 @@ function main()
 	curpage = MAIN;
 	try_authenticate();
 	/* Try authenticating with cookie if there is one */
-	$.ajax({
+/*
+    $.ajax({
 		url: '/cgi-bin/index.cgi/courses',
 		async: false,
 		type: 'POST',
@@ -364,6 +365,7 @@ function main()
 		}, error: function(result,ts,err) {
 			console.log([result,ts,err]);
 		}
-	});
+	});*/
+    showAccountSettings();
 }
 

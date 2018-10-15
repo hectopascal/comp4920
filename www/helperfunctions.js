@@ -7,7 +7,8 @@ const DELCOMP = 5;
 var curpage = MAIN;
 var last_query = '';
 var hitbottom= true;
-
+var user_display_name='';
+var user_email='';
 var wait = false;
 var offset=0;
 var userId=0;

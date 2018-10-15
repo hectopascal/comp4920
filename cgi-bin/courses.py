@@ -596,8 +596,95 @@ def completed_courses():
             conn.close()
     return ""
 
+#############Functions for Account page#########
 
+@app.route('/allreviewed', methods=['POST'] )
+def get_all_reviewed():
+    data = request.get_json()
+    user = data.get('user','')
+    sql = """SELECT * FROM reviews 
+            WHERE uid=%s ; """
 
+    
+    conn = None
+    vendor_id = None
+    try:
+        conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com", 
+                           database = "cs4920", 
+                           user = "gill", 
+                           password = "gill")
+        cur = conn.cursor()
+        cur.execute(sql % user) 
+        records = cur.fetchall()
+        cur.close()
+        if conn is not None: 
+            conn.close()
+        return json.dumps(records)
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error,file=sys.stderr)
+        if conn is not None:
+            conn.close()
+    return ""
+
+@app.route('/allcompleted', methods=['POST'] )
+def get_all_completed():
+    data = request.get_json()
+    user = data.get('user','')
+    sql = """SELECT ccode FROM completed_courses 
+            WHERE uid=%s ; """
+
+    
+    conn = None
+    vendor_id = None
+    try:
+        conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com", 
+                           database = "cs4920", 
+                           user = "gill", 
+                           password = "gill")
+        cur = conn.cursor()
+        cur.execute(sql % user) 
+        records = cur.fetchall()
+        
+        cur.close()
+        if conn is not None: 
+            conn.close()
+        return json.dumps(records)
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error,file=sys.stderr)
+        if conn is not None:
+            conn.close()
+    return ""
+@app.route('/userinfo', methods=['POST'])
+def get_user_information():
+    data = request.get_json()
+    user = data.get('user')
+
+    sql ="""select username, nickname from users where id=%s ;"""
+    
+    conn = None
+    vendor_id = None
+    try:
+        conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com", 
+                           database = "cs4920", 
+                           user = "gill", 
+                           password = "gill")
+        cur = conn.cursor()
+        cur.execute(sql % user) 
+        records = cur.fetchall()
+
+        conn.commit()
+        cur.close()
+
+    except psycopg2.Error as e:
+        print(e, file=sys.stderr)
+
+    finally:
+        if cur is not None:
+            cur.close()
+
+    return json.dumps({'success':True, "name":records[0][1],"username":records[0][0] }), 200, {'ContentType':'application/json'} 
+
+############
 @app.route('/adminPage', methods=['POST'])
 def adminPage():
 
