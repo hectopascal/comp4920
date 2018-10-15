@@ -33,7 +33,12 @@ class CourseSpider(scrapy.Spider):
         index = 0
         while (index < len(course_ids)):
             course= "".join(course_ids[index])
-            yield scrapy.Request( "https://www.handbook.unsw.edu.au/undergraduate/courses/2019/%s" % course )
+            start_urls = [
+                "https://www.handbook.unsw.edu.au/undergraduate/courses/2019/%s" % course,
+                "https://www.handbook.unsw.edu.au/postgraduate/courses/2019/%s" % course
+            ]
+            for u in start_urls:
+                yield scrapy.Request(u)
             index+=1
 
     def parse(self, response):
@@ -84,13 +89,22 @@ class CourseSpider(scrapy.Spider):
                     excln_string = excln_string + ", "
 
         # study_level =  response.xpath('//*[@id="default-page-details-template"]/div[3]/div[2]/div/div/div/div[3]/div[1]/div/div/div[3]/div/p')
-        study_level = response.xpath('//p[@class="enable-helptext"]/text()').extract_first()
-        # print(study_level)
+        study_level_undergrad = response.xpath('//p[@class="enable-helptext"]/text()').extract_first()
+        study_leve_postgrad = response.xpath('//button[@class="helptext__help--label"]/text()').extract_first()
+        # print(study_level_undergrad)
+        # print(study_leve_postgrad)
+        study_level = "";
+        if (study_level_undergrad):
+            study_level = study_level_undergrad
+        elif (study_leve_postgrad):
+            study_level = study_leve_postgrad
+        print(study_level)
 
         # Send Prerequisite, equivalence and exclusions to Database
         # prereq_courses
         # equal_string
         # excln_string
+
         try:
             sql_command_prereq = """UPDATE courses SET prereqs = %s WHERE code = %s;"""
             sql_command_equal = """UPDATE courses SET exclusions = %s WHERE code = %s;"""
