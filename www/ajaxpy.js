@@ -317,6 +317,20 @@ $(document).ready(function(){
 		    }
         }
     });
+    $('#useracc').click(function(e){
+        if(userId!=0){ //logged in
+            showAccountSettings();
+        } else { //not logged in!
+			if(!wait){
+				wait=true;
+            	$('<div class="alert alert-warning" role="alert">Login required!</div>').insertBefore('#main_body').delay(3000).fadeOut(function(){
+                    wait = false;
+                    $(this).remove();
+                });
+
+		    }
+        }
+    });
     $('#review-success').hide();
     $('#review-failure').hide();
     $("#searchButton" ).click(function(e) {

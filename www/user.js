@@ -130,10 +130,11 @@ function showAccountSettings(){
     main.appendChild(document.createElement('p'));
     main.appendChild(reviews_container);
     get_all_reviewed();
+    main.appendChild(document.createElement("p"));
 }
+
 function display_reviewed(results){
     var container = document.getElementById('reviews_container');
-/*  TODO	
     
     var ul = document.createElement("ul");
 	ul.setAttribute('class','list-group');
@@ -141,16 +142,15 @@ function display_reviewed(results){
         for(var i=0; i<results.length; ++i){
 		    var li = document.createElement("li");
             li.setAttribute('class','list-group-item');
-            li.appendChild(document.createTextNode(results[i][0]));
+            li.appendChild(document.createTextNode(results[i][5]+": "+ results[i][2]));
             ul.appendChild(li);
         }
     }
-
-*/
+    
     var header = document.createElement("h1");
     header.appendChild(document.createTextNode("Reviewed Courses"));
     container.appendChild(header);
-
+    container.appendChild(ul);
 }
 
 function display_completed(results) {
