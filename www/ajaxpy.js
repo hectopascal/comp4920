@@ -305,6 +305,8 @@ $(document).ready(function(){
     });
     $('#useradd').click(function(e){
         if(userId!=0){ //logged in
+			document.getElementById("useracc").setAttribute("class", "nav-link");
+			document.getElementById("useradd").setAttribute("class", "nav-link active");
             changeTo_addCoursesPage();
         } else { //not logged in!
 			if(!wait){
@@ -319,6 +321,8 @@ $(document).ready(function(){
     });
     $('#useracc').click(function(e){
         if(userId!=0){ //logged in
+			document.getElementById("useracc").setAttribute("class", "nav-link active");
+			document.getElementById("useradd").setAttribute("class", "nav-link");
             showAccountSettings();
         } else { //not logged in!
 			if(!wait){
