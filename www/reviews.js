@@ -30,3 +30,27 @@ function updown_Listener(){
         
     });
 }
+
+function flag_Listener() {
+   $(".flag").click(function(e) {
+      e.preventDefault();
+      console.log($(this).attr('pid'));
+      var post = $(this).attr('pid');
+
+      $.ajax({
+         url: '/cgi-bin/index.cgi/flagPost',
+         async: false,
+         type: 'POST',
+         dataType: 'json',
+         contentType: 'application/json',
+         data: JSON.stringify({"post": post}),
+         success: function(response) {
+            console.log(response);
+         }, error: function(result,ts,err) {
+            console.log(result);
+            console.log([result,ts,err]);
+         }
+      });
+ 
+   });
+}
