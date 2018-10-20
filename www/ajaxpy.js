@@ -131,6 +131,37 @@ function addCompletedListener(c_code,checked){
     });
 
 }
+function settingsPageListener(){
+    $("#savesettingsbutton" ).click(function(e) {
+        e.preventDefault();
+        data = {"dispname": $('#dispname').val(),
+                "uid"   : userId,
+                "major" : $('#major').val()  ,
+                "program": $('#program').val()
+        }
+        $.ajax({
+            url: '/cgi-bin/index.cgi/saveuser',
+            async: false,
+            type: 'POST',
+            dataType: 'json',
+            contentType: 'application/json;',
+            data: JSON.stringify(data),
+            success: function(response) {
+                console.log(response);
+                console.log("review success");
+
+            },
+            error: function(result,ts,err) {
+                console.log([result,ts,err]);
+                console.log("review failure");
+            }
+        });
+
+    });
+
+
+}
+
 function submitReviewListener(){
     $(".submitReview" ).click(function(e) {
         e.preventDefault();
@@ -462,6 +493,8 @@ function get_user_info(){
         success: function(response) {
             user_display_name = response.name;
             user_email = response.username;
+            user_major = response.major;
+            user_program = response.program;
             hitbottom=false;
         }, error: function(result,ts,err) {
             console.log([result,ts,err]);
