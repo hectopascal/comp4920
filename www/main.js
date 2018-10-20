@@ -190,8 +190,7 @@ function reviewForm(k)
 
 	// Text cleaning here
 		var reviewText = review.value;
-		var Filter = require('bad-words'),
-	    filter = new Filter();
+	    var filter = new Filter();
 		var reviewCleaned = filter.clean(reviewText);
 		review.value= reviewCleaned;
 
