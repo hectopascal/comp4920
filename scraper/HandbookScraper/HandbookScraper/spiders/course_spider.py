@@ -9,7 +9,7 @@ class CourseSpider(scrapy.Spider):
     name = "courses"
 
     def start_requests(self):
-        form_data = { "track_scores":True,"_source":{"includes":["*.code","*.name","*.award_titles","*.keywords","*.active","urlmap","contenttype"],"excludes":["",None,None]},"query":{"filtered":{"query":{"bool":{"must":[{"bool":{"minimum_should_match":"100%","should":[{"query_string":{"fields":["*owning_org*"],"query":"*1a3a1d4f4f4d97404aa6eb4f0310c780*"}}]}},{"query_string":{"fields":["*.active"],"query":"*1*"}}]}},"filter":{"bool":{"should":[{"term":{"contenttype":"subject"}}],"must_not":[{"missing":{"field":"*.name"}}]}}}},"from":0,"size":120,"sort":[{"subject.code":"asc"}] }
+        form_data = { "track_scores":True,"_source":{"includes":["*.code","*.name","*.award_titles","*.keywords","*.active","urlmap","contenttype"],"excludes":["",None,None]},"query":{"filtered":{"query":{"bool":{"must":[{"bool":{"minimum_should_match":"100%","should":[{"query_string":{"fields":["*owning_org*"],"query":"*1a3a1d4f4f4d97404aa6eb4f0310c780*"}}]}},{"query_string":{"fields":["*.active"],"query":"*1*"}}]}},"filter":{"bool":{"should":[{"term":{"contenttype":"subject"}}],"must_not":[{"missing":{"field":"*.name"}}]}}}},"from":0,"size":300,"sort":[{"subject.code":"asc"}] }
         request_body = json.dumps(form_data)
         yield scrapy.Request('https://www.handbook.unsw.edu.au/api/es/search',
                                 callback=self.parse,

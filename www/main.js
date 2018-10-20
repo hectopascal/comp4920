@@ -10,7 +10,7 @@ function appendRating(rating)
 			irating.setAttribute('class', 'fas fa-star star-rating');
 		else
 			irating.setAttribute('class', 'far fa-star star-rating-empty');
-			
+
 		rating--;
 	}
 	crating.setAttribute('class', 'ml-2');
@@ -31,7 +31,7 @@ function appendPost(user_title, rating, post,pId, score)
 	ccontent.setAttribute('class', 'pl-2 p-1');
 	ccontent.appendChild(document.createTextNode(post));
 	cpost.appendChild(ccontent);
-    
+
     //rate reviews functionality
     var div = document.createElement('div');
     div.setAttribute("class", "d-flex justify-content-end");
@@ -177,7 +177,7 @@ function display_courses(results,containerId='main_body',complete=false){
         for (var i = 0 ; i < results.length; i++){
             var rating = results[i][4];
 
-            var c_code = results[i][1]; 
+            var c_code = results[i][1];
             if(!document.getElementById(c_code)){
                 var type = 'reviews';
                 if (containerId === 'results_container'){
@@ -200,7 +200,7 @@ function display_courses(results,containerId='main_body',complete=false){
                         var checked = true;
                     }
                     addCompletedListener(c_code,checked);
-               
+
                 } else{
                     var tog_rev = document.createElement('button');
                     tog_rev.type = 'submit';
@@ -210,7 +210,7 @@ function display_courses(results,containerId='main_body',complete=false){
                     tog_rev.setAttribute('class',  "tog_rev btn btn-info btn-lg");
                     var node = document.getElementById(c_code);
                     node.insertBefore(reviewForm(c_code),node.childNodes[2]);
-                    node.insertBefore(tog_rev,node.childNodes[2]);        
+                    node.insertBefore(tog_rev,node.childNodes[2]);
 
                 }
             }
@@ -218,7 +218,7 @@ function display_courses(results,containerId='main_body',complete=false){
         if(containerId==='main_body'){
             submitReviewListener();
 	    	showReviewListener();
-        }        
+        }
     } else {
         if (containerId=== "results_container"){
             container.appendChild(document.createElement('p'));
@@ -228,7 +228,7 @@ function display_courses(results,containerId='main_body',complete=false){
             container.appendChild(document.createElement('p'));
             container.appendChild(document.createTextNode("No courses matching your query found. Try again?"));
         }
-    } 
+    }
 }
 function getRating(course){
     var rating=0;
@@ -275,7 +275,7 @@ function reviewForm(c_code)
     div.setAttribute('class', "form-group toggle collapse accordion-group");
     div.setAttribute('data-parent','#main_body');
     div.id    = "reviewDiv"+c_code;
-   
+
 
     var f = document.createElement("form");
     f.setAttribute('class','courseform');
@@ -327,7 +327,7 @@ function reviewForm(c_code)
     s.type = "submit";
     s.value = "Submit";
     s.setAttribute('class','submitReview');
-    
+
     s.id = "submit_"+c_code;
     s.setAttribute("course",c_code);
     // add all elements to the form
@@ -338,18 +338,24 @@ function reviewForm(c_code)
     f.appendChild(i);
     p = document.createElement('p');
     f.appendChild(p);
-    
+
     f.appendChild(document.createTextNode("Rate the course:  "))
     f.appendChild(r);
 	p = document.createElement('p');
     f.appendChild(p);
-    
+
+	// Text cleaning here
+		var reviewText = review.value;
+	    var filter = new Filter();
+		var reviewCleaned = filter.clean(reviewText);
+		review.value= reviewCleaned;
+
     f.appendChild(review);
     p = document.createElement('p');
-    f.appendChild(p); 
+    f.appendChild(p);
 
     f.appendChild(s);
-    
+
     div.appendChild(f);
     return div;
 
@@ -382,4 +388,3 @@ function main()
 		}
 	});
 }
-
