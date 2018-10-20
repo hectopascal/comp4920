@@ -26,8 +26,8 @@ for i in range(0, num_titles):
         title_similarities.iloc[i,j] = 1 - cosine(user_reviews_matrix.iloc[:,i], user_reviews_matrix.iloc[:,j])
 
 # Recommends the top 15 courses to take (empty table)
-recommendations = pd.DataFrame(index=title_similarities.columns, columns=range(1,16))
+recommendations = pd.DataFrame(index=title_similarities.columns, columns=range(1,21))
 
 for i in range(0, len(title_similarities)):
-    recommendations.iloc[i,:15] = title_similarities.iloc[0:,i].sort_values(ascending=False)[:15].index
-recommendations.to_csv('../db/book_recommendations.csv')
+    recommendations.iloc[i,:20] = title_similarities.iloc[0:,i].sort_values(ascending=False)[:20].index
+recommendations.to_csv('../db/course_recommendations.csv')
