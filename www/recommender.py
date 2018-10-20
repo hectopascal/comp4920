@@ -1,12 +1,16 @@
 #!/usr/local/bin/python3
 
+# Followed the following link to create this simple recmommendation
 # http://computerscience.fyi/which-book-should-i-read-next-recommendation-engine-with-item-item-collaborative-filtering/
+# Based on cosine similiarity - https://en.wikipedia.org/wiki/Cosine_similarity
 
 import pandas as pd
 import numpy as np
 import math
 from scipy.spatial.distance import cosine
 
+# import the postgre db as csv and parse into pandas
+# https://stackoverflow.com/questions/2987433/how-to-import-csv-file-data-into-a-postgresql-table
 reviews = pd.read_csv('../db/course_review.csv', delimiter=',', header=0, names=['course','student','rating'])
 # print(reviews.head(5))
 user_reviews_matrix = pd.pivot_table(reviews, index='student', columns='course', values='rating',aggfunc='first')
