@@ -660,7 +660,7 @@ def get_user_information():
     data = request.get_json()
     user = data.get('user')
 
-    sql ="""select username, nickname from users where id=%s ;"""
+    sql ="""select username, nickname,program,major from users where id=%s ;"""
     
     conn = None
     vendor_id = None
@@ -683,7 +683,46 @@ def get_user_information():
         if cur is not None:
             cur.close()
 
-    return json.dumps({'success':True, "name":records[0][1],"username":records[0][0] }), 200, {'ContentType':'application/json'} 
+    return json.dumps({'success':True, "name":records[0][1],"username":records[0][0],"program":records[0][2],"major":records[0][3] }), 200, {'ContentType':'application/json'} 
+
+
+
+
+@app.route('/saveuser', methods=['POST'] )
+def set_user_information():
+    print(request.data,file=sys.stderr)
+    data = request.get_json()
+    uid = data.get('uid')
+    dispname = data.get('dispname')
+    major = data.get('major')
+    program = data.get('program')
+    sql = """update users set major=%s, program=%s,
+             nickname=%s where id=%s ;"""
+    conn = None
+    
+    try:
+        # read database configuration
+        # connect to the PostgreSQL database
+        conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com", 
+                           database = "cs4920", 
+                           user = "gill", 
+                           password = "gill")
+        cur = conn.cursor()
+        
+        cur.execute(sql,(major,program,dispname,uid))
+        
+        conn.commit()
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error,file=sys.stderr)
+    finally:
+        if conn is not None:
+            conn.close()
+    return  json.dumps({'success':True}), 200, {'ContentType':'application/json'}
+
+
+
+
 
 ############
 @app.route('/adminPage', methods=['POST'])

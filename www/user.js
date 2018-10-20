@@ -14,6 +14,7 @@ function showAccountSettings(){
     container.appendChild(document.createElement("p"));
     //FORM START
     var f = document.createElement("form");
+    f.id = "user_settings";
     f.setAttribute('method',"post");
     f.setAttribute("accept-charset","utf-8");
     
@@ -81,6 +82,7 @@ function showAccountSettings(){
     i.name = "program";
     i.id = "program";
     i.placeholder = "Program";
+    i.value = user_program;
     div.appendChild(label);
     div2.appendChild(i);
     div.appendChild(div2);
@@ -96,6 +98,7 @@ function showAccountSettings(){
     label.setAttribute('class','col-sm-2 col-form-label col-form-label-lg');
     i = document.createElement("input");
     i.type = "text";
+    i.value = user_major;
     i.setAttribute('class',"mr-sm-2 form-control form-control-lg");
     i.name = "major";
     i.id = "major";
@@ -106,18 +109,21 @@ function showAccountSettings(){
     f.appendChild(div);
 
     // TODO IMPLEMENT SAVE SETTINGS
+
     var s = document.createElement("button");
     s.type = "submit";
     s.value = "Submit";
     s.appendChild(document.createTextNode("Save"));
-    s.id = "codesearchbutton";
+    s.id = "savesettingsbutton";
     s.setAttribute('class',"btn btn-primary");
-    
+    f.appendChild(s); 
 
     container.appendChild(f);
     var main =document.getElementById('main_body');
     main.appendChild(container);
-     
+    settingsPageListener();
+
+
     var results_container = document.createElement("div");
     results_container.id="completed_courses";
     results_container.setAttribute("class",'container-fluid');
