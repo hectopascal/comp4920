@@ -828,5 +828,5 @@ def run_recommender():
 
 
 if __name__ == '__main__':
-   app.run()
-   # run_recommender();
+   # app.run()
+   run_recommender();
