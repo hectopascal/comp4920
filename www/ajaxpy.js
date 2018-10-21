@@ -76,7 +76,7 @@ function post_courses(type,query,containerId='main_body'){
             success: function(response) {
                 console.log((response));
                 complete = response.splice(-1,1);
-                display_courses(response,containerId,complete);
+                display_codes(response,complete);
 				curpage = COMPLETE;
                 hitbottom=false;
             }, error: function(result,ts,err) {
@@ -112,17 +112,22 @@ function post_courses(type,query,containerId='main_body'){
 }
 document.addEventListener("DOMContentLoaded", main);
 function addCompletedListener(c_code,checked){
-    $("#add_"+c_code).click(function() {
+    $("#add_"+c_code).unbind().click(function() {
+
         var course = $(this).attr('id').split('_')[1];
-        console.log(course);
         var buttontext = document.createTextNode("Uncompleted");
+        console.log(checked);
         if(checked ===false){
+            console.log("Adding course "+course);
             post_courses(ADDCOMP,course);
             var buttontext = document.createTextNode("Completed");
+			addToList(course.toUpperCase());	
             checked = true;
         } else{
+            console.log("Removing course "+course);
             post_courses(DELCOMP,course);
             checked = false;
+            rmFromList(course.toUpperCase());
         }
 
         $(this).empty();
@@ -131,6 +136,37 @@ function addCompletedListener(c_code,checked){
     });
 
 }
+function settingsPageListener(){
+    $("#savesettingsbutton" ).click(function(e) {
+        e.preventDefault();
+        data = {"dispname": $('#dispname').val(),
+                "uid"   : userId,
+                "major" : $('#major').val()  ,
+                "program": $('#program').val()
+        }
+        $.ajax({
+            url: '/cgi-bin/index.cgi/saveuser',
+            async: false,
+            type: 'POST',
+            dataType: 'json',
+            contentType: 'application/json;',
+            data: JSON.stringify(data),
+            success: function(response) {
+                console.log(response);
+                console.log("review success");
+
+            },
+            error: function(result,ts,err) {
+                console.log([result,ts,err]);
+                console.log("review failure");
+            }
+        });
+
+    });
+
+
+}
+
 function submitReviewListener(){
     $(".submitReview" ).click(function(e) {
         e.preventDefault();
@@ -280,7 +316,25 @@ function try_authenticate()
 		}
 	});
 }
+function get_recommended_courses(){
+	$.ajax({
+		url: '/cgi-bin/index.cgi/getrecs',
+		async: false,
+		type: 'POST',
+		dataType: 'json',
+		contentType: 'application/json',
+		success: function(response) {
+    
+            console.log('cookie authentication success');
+		    console.log(response);
+        
+        }, error: function(result,ts,err) {
+			console.log('cookie authentication error');
+			console.log([result,ts,err]);
+		}
+	});
 
+}
 $(document).ready(function(){
 	$(window).scroll(function() { //if scrolled to bottom, ajax post and buffer more
 		if ((window.innerHeight + window.pageYOffset) >= document.body.offsetHeight && hitbottom){
@@ -303,6 +357,7 @@ $(document).ready(function(){
             return $('#popover-content').html();
         }
     });
+    /*
     $('#useradd').click(function(e){
         if(userId!=0){ //logged in
 			document.getElementById("useracc").setAttribute("class", "nav-link");
@@ -318,11 +373,10 @@ $(document).ready(function(){
 
 		    }
         }
-    });
+    });*/
     $('#useracc').click(function(e){
         if(userId!=0){ //logged in
 			document.getElementById("useracc").setAttribute("class", "nav-link active");
-			document.getElementById("useradd").setAttribute("class", "nav-link");
             showAccountSettings();
         } else { //not logged in!
 			if(!wait){
@@ -462,6 +516,8 @@ function get_user_info(){
         success: function(response) {
             user_display_name = response.name;
             user_email = response.username;
+            user_major = response.major;
+            user_program = response.program;
             hitbottom=false;
         }, error: function(result,ts,err) {
             console.log([result,ts,err]);
