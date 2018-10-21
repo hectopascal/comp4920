@@ -153,12 +153,10 @@ function settingsPageListener(){
             data: JSON.stringify(data),
             success: function(response) {
                 console.log(response);
-                console.log("review success");
 
             },
             error: function(result,ts,err) {
                 console.log([result,ts,err]);
-                console.log("review failure");
             }
         });
 
@@ -168,16 +166,23 @@ function settingsPageListener(){
 }
 
 function submitReviewListener(){
-    $(".submitReview" ).click(function(e) {
+    $(".submitReview" ).unbind().click(function(e) {
         e.preventDefault();
         c_code = $(this).attr("course"); 
+        data = {"course": c_code,
+                "name": $('#nBox_'+c_code).val(),
+                "uid"   : userId,
+                "rating" : $('#rList_'+c_code).val()  ,
+                "review": $('#rBox_'+c_code).val()
+        }
+
         $.ajax({
             url: '/cgi-bin/index.cgi/submit',
             async: false,
             type: 'POST',
             dataType: 'json',
             contentType: 'application/json; charset=UTF-8',
-            data: $('#reviewform_'+c_code).serialize(),
+            data: JSON.stringify(data),
             success: function(response) {
                 console.log(response);
                 console.log("review success");
@@ -323,11 +328,18 @@ function get_recommended_courses(){
 		type: 'POST',
 		dataType: 'json',
 		contentType: 'application/json',
+        data: JSON.stringify({"uid":userId}),
 		success: function(response) {
-    
-            console.log('cookie authentication success');
+            var ul = document.getElementById('rec_list');  
 		    console.log(response);
-        
+            for(var i =0;i<response.length;++i){
+                var li = document.createElement("li");
+                li.setAttribute('class','list-group-item course_done');
+			    li.id = "rec_"+response[i];
+                li.appendChild(document.createTextNode(response[i]));
+                ul.appendChild(li);
+
+            }  
         }, error: function(result,ts,err) {
 			console.log('cookie authentication error');
 			console.log([result,ts,err]);
