@@ -1,8 +1,9 @@
 function showAccountSettings(){
-    
-    get_user_info()
+
+    get_user_info();
+
     clear_children('main_body');
-    
+
     var container = document.createElement("div");
     container.setAttribute("class","jumbotron");
 
@@ -17,15 +18,15 @@ function showAccountSettings(){
     f.id = "user_settings";
     f.setAttribute('method',"post");
     f.setAttribute("accept-charset","utf-8");
-    
+
     var div = document.createElement('div');
-    div.setAttribute('class','form-group row'); 
-    
+    div.setAttribute('class','form-group row');
+
     var label = document.createElement("label");
     label.appendChild(document.createTextNode("Username"));
     label.setAttribute("for","email");
     label.setAttribute('class','col-sm-2 col-form-label col-form-label-lg');
-    
+
     var div2 = document.createElement('div');
     div2.setAttribute('class','col-sm-10');
     var email = document.createElement("input");
@@ -33,7 +34,7 @@ function showAccountSettings(){
     email.setAttribute('class',"form-control form-control-lg");
     email.setAttribute("readonly","readonly");
     email.name  = "email";
-    email.id    = "email"; 
+    email.id    = "email";
     email.value = user_email;
     user_email  ='';
     div2.appendChild(email)
@@ -45,7 +46,7 @@ function showAccountSettings(){
 
     //NEW formgroup
     div = document.createElement('div');
-    div.setAttribute('class','form-group row'); 
+    div.setAttribute('class','form-group row');
     label = document.createElement("label");
     label.appendChild(document.createTextNode("Display Name"));
     label.setAttribute("for","dispname");
@@ -63,17 +64,17 @@ function showAccountSettings(){
     div.appendChild(label);
     div2.appendChild(dispname);
     div.appendChild(div2);
-    f.appendChild(div); 
-    
-    
+    f.appendChild(div);
+
+
     //NEW formgroup program and major
     div = document.createElement('div');
-    div.setAttribute('class','form-group row'); 
+    div.setAttribute('class','form-group row');
     label = document.createElement("label");
     label.appendChild(document.createTextNode("Program"));
     label.setAttribute("for","program");
     label.setAttribute('class','col-sm-2 col-form-label col-form-label-lg');
-    
+
     div2 = document.createElement("div");
     div2.setAttribute('class','col-sm-10');
     var i = document.createElement("input");
@@ -87,9 +88,11 @@ function showAccountSettings(){
     div2.appendChild(i);
     div.appendChild(div2);
     f.appendChild(div);
-    
+
+
+
     div = document.createElement('div');
-    div.setAttribute('class','form-group row'); 
+    div.setAttribute('class','form-group row');
     div2 = document.createElement("div");
     div2.setAttribute('class','col-sm-10');
     label = document.createElement("label");
@@ -115,7 +118,7 @@ function showAccountSettings(){
     s.appendChild(document.createTextNode("Save"));
     s.id = "savesettingsbutton";
     s.setAttribute('class',"btn btn-primary");
-    f.appendChild(s); 
+    f.appendChild(s);
 
     container.appendChild(f);
     var main =document.getElementById('main_body');
@@ -128,8 +131,8 @@ function showAccountSettings(){
 
     var results_container = document.createElement("div");
     results_container.id="completed_courses";
-    results_container.setAttribute("class",'col');
- 
+    results_container.setAttribute("class",'col scrollable');
+
     var find_completed_container = document.createElement("div");
     find_completed_container.setAttribute('id',"add_complete");
     find_completed_container.setAttribute("class",'col');
@@ -139,11 +142,35 @@ function showAccountSettings(){
     main.appendChild(complete_courses_div);
     get_all_completed();
 
-    var reviews_container = document.createElement("div"); 
+
+    //REVIEWS AND RECOMMENDED ROW
+    var recv = document.createElement("div")
+    recv.setAttribute('class','form-group row');
+
+
+    //REVIEWED COURSES ROW
+    var reviews_container = document.createElement("div");
     reviews_container.id="reviews_container";
-    reviews_container.setAttribute("class",'container-fluid');
+    reviews_container.setAttribute("class",'col scrollable');
     main.appendChild(document.createElement('p'));
-    main.appendChild(reviews_container);
+    recv.appendChild(reviews_container);
+
+
+    //recommended courses
+    var recommended_div = document.createElement("div");
+    recommended_div.setAttribute("class",'col scrollable');
+    var ul = document.createElement("ul");
+	ul.setAttribute('class','list-group');
+    ul.id ="rec_list";
+    var rec_h1 = document.createElement("h1");
+    rec_h1.appendChild(document.createTextNode("Recommended for you:"));
+    recommended_div.appendChild(rec_h1);
+
+    recommended_div.appendChild(ul);
+    recv.appendChild(recommended_div);
+
+       main.appendChild(recv);
+    get_recommended_courses();
     get_all_reviewed();
     main.appendChild(document.createElement("p"));
     addCoursesPage();
@@ -151,7 +178,7 @@ function showAccountSettings(){
 
 function display_reviewed(results){
     var container = document.getElementById('reviews_container');
-    
+
     var ul = document.createElement("ul");
 	ul.setAttribute('class','list-group');
     if (results.length !==0) {
@@ -162,7 +189,7 @@ function display_reviewed(results){
             ul.appendChild(li);
         }
     }
-    
+
     var header = document.createElement("h1");
     header.appendChild(document.createTextNode("Reviewed Courses"));
     container.appendChild(header);
@@ -172,7 +199,6 @@ function display_reviewed(results){
 function display_completed(results) {
     var container = document.getElementById('completed_courses');
     var div = document.createElement('div');
-    div.setAttribute('class','scrollable');
 	var ul = document.createElement("ul");
 	ul.setAttribute('class','list-group');
     ul.id ="completed_list";
@@ -236,7 +262,7 @@ function addToList(c_code){
     $('.delete').unbind().on('click', function(){
         var el = $(this).closest('.course_done');
         uncompleteCourse(el.attr('id'));
-        cuteHide(el);  
+        cuteHide(el);
     });
 
 
@@ -250,7 +276,7 @@ function display_codes(results,complete){
         for (var i = 0 ; i < results.length; i++){
                 //DISPLAY RESULTS
                 var c_code = results[i][1];
-                
+
                 var checked = false;
                 var rightdiv = document.createElement('div');
                 rightdiv.setAttribute('class','ml-3');
@@ -258,14 +284,14 @@ function display_codes(results,complete){
                 button.setAttribute('class',"btn btn-default");
                 button.id="add_"+c_code;
                 button.appendChild(document.createTextNode("Uncompleted"));
-                
+
                 rightdiv.appendChild(document.createTextNode(c_code));
                 rightdiv.appendChild(button);
 
                 if(complete[0][0][0] === true){
                     button.classList.remove('btn-default');
                     button.removeChild(button.firstChild);
-                    
+
                     button.appendChild(document.createTextNode("Completed"));
                     button.classList.add('btn-success');
                     var checked = true;
@@ -279,13 +305,13 @@ function display_codes(results,complete){
         container.appendChild(document.createElement('p'));
         container.appendChild(document.createTextNode("No courses found. Please enter exact course code."));
     }
-    
+
 
 
     $('.delete').unbind().on('click', function(){
         var el = $(this).closest('.course_done');
         uncompleteCourse(el.attr('id'));
-        cuteHide(el);  
+        cuteHide(el);
     });
 
 }
@@ -320,14 +346,14 @@ function uncompleteCourse(code){
 function addCoursesPage(){
     var container = document.createElement("div");
     container.setAttribute("class","jumbotron");
-    
+
     var header = document.createElement("h1");
     header.appendChild(document.createTextNode("Add your completed courses"));
     container.appendChild(header);
     var f = document.createElement("form");
     f.setAttribute('method',"post");
     f.setAttribute("accept-charset","utf-8");
-    f.setAttribute("class","form-inline") 
+    f.setAttribute("class","form-inline")
     var div = document.createElement('div');
     div.id    = "addcoursespage";
     div.setAttribute('class','form-group');
@@ -346,7 +372,7 @@ function addCoursesPage(){
     s.appendChild(document.createTextNode("Search"));
     s.id = "codesearchbutton";
     s.setAttribute('class',"btn btn-primary");
-    
+
     var p = document.createElement('p');
     div.appendChild(p);
     div.appendChild(i);
@@ -356,7 +382,7 @@ function addCoursesPage(){
     container.appendChild(f);
     var main =document.getElementById('add_complete');
     main.appendChild(container);
-   
+
     var results_container = document.createElement("div");
     results_container.id="results_container";
     results_container.setAttribute("class",'container-fluid');
@@ -364,4 +390,3 @@ function addCoursesPage(){
     searchCourseCodeListener();
 
 }
-
