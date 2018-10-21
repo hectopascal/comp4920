@@ -10,6 +10,9 @@ import sys
 import urllib2
 import hashlib
 import uuid
+import importlib, importlib.util
+import csv
+import runpy
 
 app = Flask(__name__)
 #sys.stderr = sys.stdout
@@ -781,32 +784,49 @@ def deletePost():
    return ""
 
 
-@app.route('/updateRecommender', methods=['POST'])
-def updateRecommender():
-    conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com",
-                            database = "cs4920",
-                            user = "gill",
-                            password = "gill")
+# @app.route('/updateRecommender', methods=['POST'])
+# def updateRecommender():
+#     conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com",
+#                             database = "cs4920",
+#                             user = "gill",
+#                             password = "gill")
+#
+#     # create a new cursor and Delete the post with id == post_id
+#     cur = conn.cursor()
+#
+#     reviews = pd.read_csv('../db/course_recommendations.csv', delimiter=',', header=0, names=['course','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20'])
+#     cur.execute('COPY reviews FROM "../db/course_recommendations" WITH DELIMITER "," CSV HEADER)
+#     conn.commit()
+#     update = cur.statusmessage[-1]
+#
+#     except psycopg2.Error as e:
+#        print(e, file=sys.stderr)
+#     finally:
+#       if cur is not None:
+#          cur.close()
+#
+#       if conn is not None:
+#          conn.close()
+#
+#     return json.dumps({'success': "Updated ? = " + update}), 200, {'ContentType':'application/json'}
 
-    # create a new cursor and Delete the post with id == post_id
-    cur = conn.cursor()
 
-    reviews = pd.read_csv('../db/course_recommendations.csv', delimiter=',', header=0, names=['course','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20'])
-    cur.execute('COPY reviews FROM "../db/course_recommendations" WITH DELIMITER "," CSV HEADER)
-    conn.commit()
-    update = cur.statusmessage[-1]
+# https://stackoverflow.com/questions/67631/how-to-import-a-module-given-the-full-path
+def run_recommender():
+    # spec = importlib.util.spec_from_file_location("recommender.main", "../www/recommender.py")
+    # cr = importlib.util.module_from_spec(spec)
+    # spec.loader.exec_module(cr)
 
-    except psycopg2.Error as e:
-       print(e, file=sys.stderr)
-    finally:
-      if cur is not None:
-         cur.close()
+    runpy.run_path("../www/recommender.py") # executes the other python script
+    with open('../db/course_recommendations.csv', 'r') as f:
+        reader = csv.reader(f)
+        course_list = list(reader)
 
-      if conn is not None:
-         conn.close()
+        # print (course_list)
+        return (course_list)
 
-    return json.dumps({'success': "Updated ? = " + update}), 200, {'ContentType':'application/json'}
 
 
 if __name__ == '__main__':
-   app.run()
+   # app.run()
+   run_recommender();
