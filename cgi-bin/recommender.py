@@ -40,16 +40,16 @@ def main():
     reviews = pd.read_csv('course_review.csv', delimiter=',', header=0, names=['course','uid','rating'])
     # print(reviews.head(5))
     reviews = reviews.fillna('anon')
-    print (reviews)
+    # print (reviews)
     user_reviews_matrix = pd.pivot_table(reviews, index='uid', columns='course', values='rating')
     user_reviews_matrix = user_reviews_matrix.fillna(0)
-    print ('users review')
-    print (user_reviews_matrix)
+    # print ('users review')
+    # print (user_reviews_matrix)
     # user_reviews_matrix = user_reviews_matrix.fillna(0) // Fill empty spaces with 0
 
     title_similarities = pd.DataFrame(index=user_reviews_matrix.columns, columns=user_reviews_matrix.columns)
 
-    print (title_similarities)
+    # print (title_similarities)
     # fill above table frame with the cosine distance between every course
     num_titles = len(title_similarities.columns)
     for i in range(0, num_titles):
@@ -63,7 +63,7 @@ def main():
     for i in range(0, len(title_similarities)):
         recommendations.iloc[i,:5] = title_similarities.iloc[0:,i].sort_values(ascending=False)[:5].index
     recommendations.to_csv('course_recommendations.csv')
-    print (title_similarities)
+    # print (title_similarities)
     # https://stackoverflow.com/questions/2987433/how-to-import-csv-file-data-into-a-postgresql-table
     # try:
     #     # connect to the PostgreSQL database
