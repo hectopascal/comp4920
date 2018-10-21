@@ -10,6 +10,9 @@ import sys
 import urllib2
 import hashlib
 import uuid
+import importlib, importlib.util
+import csv
+import runpy
 
 app = Flask(__name__)
 #sys.stderr = sys.stdout
@@ -36,7 +39,7 @@ def queryDatabase(sql, data, fetchone = False):
                 ret = None
 
     return ret
-    
+
 @app.route('/rate_review', methods=['POST'])
 def rate_review():
 
@@ -47,15 +50,15 @@ def rate_review():
     change = data.get('type', '')
     value,postid = data.get('post', '').split('_',1);
 
-    conn = None  
+    conn = None
     get_score = """SELECT score FROM reviews WHERE id=%s"""
     set_score = """UPDATE reviews SET score=%s WHERE id=%s"""
     conn = None
     vendor_id = None
     try:
-        conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com", 
-                           database = "cs4920", 
-                           user = "gill", 
+        conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com",
+                           database = "cs4920",
+                           user = "gill",
                            password = "gill")
 
         cur = conn.cursor()
@@ -70,7 +73,7 @@ def rate_review():
         #commit & close
         conn.commit()
         cur.close()
-        
+
         if conn is not None:
             conn.close()
         return json.dumps(score)
@@ -78,7 +81,7 @@ def rate_review():
         print(error,file=sys.stderr)
         if conn is not None:
                 conn.close()
-    
+
     return "Error Error Error !!!"
 
 
@@ -88,9 +91,9 @@ def get_mean_rating():
 	conn = None
 	vendor_id = None
 	try:
-            conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com", 
-                       database = "cs4920", 
-                       user = "gill", 
+            conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com",
+                       database = "cs4920",
+                       user = "gill",
                        password = "gill")
 
             cur = conn.cursor()
@@ -115,9 +118,9 @@ def get_reviews():
 	conn = None
 	vendor_id = None
 	try:
-		conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com", 
-                           database = "cs4920", 
-                           user = "gill", 
+		conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com",
+                           database = "cs4920",
+                           user = "gill",
                            password = "gill")
 
 		cur = conn.cursor()
@@ -140,11 +143,11 @@ def get_reviews():
 
 @app.route('/courses', methods=['POST'])
 def json_courses():
-    conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com", 
-                           database = "cs4920", 
-                           user = "kelvin", 
+    conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com",
+                           database = "cs4920",
+                           user = "kelvin",
                            password = "kelvin")
-   
+
     cur = conn.cursor()
 
     data = request.get_json()
@@ -170,7 +173,7 @@ def json_courses():
         limit %s offset %s ;
     '''
     cur.execute(sql, (limit,offset))
-   
+
     records = cur.fetchall()
     return json.dumps(records)
 
@@ -183,29 +186,29 @@ def filter_course():
     exact = data.get('exact','')
     if(exact):
         offset = '0'
-        sql = """SELECT * FROM courses 
+        sql = """SELECT * FROM courses
             WHERE (LOWER(code) LIKE LOWER(%s))
             limit 10 offset %s; """
 
     else :
         """ insert a new review """
-        sql = """SELECT * FROM courses 
+        sql = """SELECT * FROM courses
                 WHERE (LOWER(code) LIKE LOWER('%%'|| %s || '%%'))
                 limit 10 offset %s ; """
-    
+
     conn = None
     vendor_id = None
     try:
-        conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com", 
-                           database = "cs4920", 
-                           user = "gill", 
+        conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com",
+                           database = "cs4920",
+                           user = "gill",
                            password = "gill")
         cur = conn.cursor()
         cur.execute(sql, (search_term, offset))
         records = cur.fetchall()
         conn.commit()
         cur.close()
-        if conn is not None: 
+        if conn is not None:
             conn.close()
         return json.dumps(records)
     except (Exception, psycopg2.DatabaseError) as error:
@@ -224,8 +227,8 @@ def search_course():
     offset = data.get('offset','')
     print(offset,file=sys.stderr)
     """ insert a new review """
-    sql = """SELECT * FROM courses 
-            WHERE (LOWER(code) LIKE LOWER('%%'|| %s || '%%')) or 
+    sql = """SELECT * FROM courses
+            WHERE (LOWER(code) LIKE LOWER('%%'|| %s || '%%')) or
             (LOWER(name) LIKE LOWER('%%' || %s || '%%'))
             limit 10 offset %s ; """
     conn = None
@@ -233,9 +236,9 @@ def search_course():
     try:
         # read database configuration
         # connect to the PostgreSQL database
-        conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com", 
-                           database = "cs4920", 
-                           user = "gill", 
+        conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com",
+                           database = "cs4920",
+                           user = "gill",
                            password = "gill")
         # create a new cursor
         cur = conn.cursor()
@@ -246,7 +249,7 @@ def search_course():
         # commit the changes to the database
         conn.commit()
         cur.close()
-        if conn is not None: 
+        if conn is not None:
             conn.close()
         return json.dumps(records)
     except (Exception, psycopg2.DatabaseError) as error:
@@ -259,7 +262,7 @@ def search_course():
 def submit_form():
     print(request.data,file=sys.stderr)
     course, name, rating, review = request.data.split("&",3)
-    
+
     value,course    = course.split('=',1)
     offering        = 5 #temporary value until all the offering/course information is in the database
     score           = 0
@@ -268,29 +271,29 @@ def submit_form():
     user            = urllib2.unquote(name)
 
     value,rating    = rating.split('=',1)
-    
+
     value,review    = review.split('=',1)
     review          = urllib2.unquote(review)
-    
+
     """ insert a new review """
     sql = """INSERT INTO reviews(rating,feedback,author,score,course)
-             VALUES(%s,%s,%s,%s,%s) 
+             VALUES(%s,%s,%s,%s,%s)
              RETURNING feedback;"""
     conn = None
     vendor_id = None
-    
-    get_mean = """SELECT mean_rating,review_count 
-                FROM courses 
+
+    get_mean = """SELECT mean_rating,review_count
+                FROM courses
                 WHERE code='%s' """
-    set_mean = """UPDATE courses 
-            SET mean_rating=%s, review_count=%s 
+    set_mean = """UPDATE courses
+            SET mean_rating=%s, review_count=%s
             WHERE code=%s"""
     try:
         # read database configuration
         # connect to the PostgreSQL database
-        conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com", 
-                           database = "cs4920", 
-                           user = "gill", 
+        conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com",
+                           database = "cs4920",
+                           user = "gill",
                            password = "gill")
         cur = conn.cursor()
         cur.execute(sql, (rating,review,user,score,course))
@@ -302,13 +305,13 @@ def submit_form():
         result = cur.execute(get_mean % course)
         meta = cur.fetchall()
         mean = float(meta[0][0])
-        
+
         count = int(meta[0][1])
         count = count+1
         mean = (float(count-1)*mean + float(rating))/float(count)
-        
+
         cur.execute(set_mean,(mean,int(count),course))
-        
+
         conn.commit()
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
@@ -383,9 +386,9 @@ def authenticate():
 
 	try:
 		# connect to the PostgreSQL database
-		conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com", 
-			database = "cs4920", 
-			user = "gill", 
+		conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com",
+			database = "cs4920",
+			user = "gill",
 			password = "gill")
 
 		cur = conn.cursor()
@@ -402,7 +405,7 @@ def authenticate():
 		return "Error Error Error !!!"
 
 	if not exist:
-		return "" #json.dumps({'success':False}), 200, {'ContentType':'application/json'} 
+		return "" #json.dumps({'success':False}), 200, {'ContentType':'application/json'}
 	else:
             return json.dumps(exist)
 
@@ -417,9 +420,9 @@ def logout():
 
 	try:
 		# connect to the PostgreSQL database
-		conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com", 
-			database = "cs4920", 
-			user = "gill", 
+		conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com",
+			database = "cs4920",
+			user = "gill",
 			password = "gill")
 
 		cur = conn.cursor()
@@ -428,7 +431,7 @@ def logout():
 		if exist:
 			cur.execute("UPDATE users SET token='%s' WHERE username='%s';" % ('', username))
 			conn.commit()
-			
+
 
 		cur.close()
 		conn.close()
@@ -440,7 +443,7 @@ def logout():
 		return "Error Error Error !!!"
 
 	if not exist:
-		return json.dumps({'success':False}), 200, {'ContentType':'application/json'} 
+		return json.dumps({'success':False}), 200, {'ContentType':'application/json'}
 	else:
 		return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 
@@ -462,22 +465,22 @@ def login_verify():
 
    # check if either username or password is empty
    if username == '' or password == '':
-      return json.dumps({'success':False}), 200, {'ContentType':'application/json'} 
+      return json.dumps({'success':False}), 200, {'ContentType':'application/json'}
 
-   
-   conn = None  
+
+   conn = None
 
    try:
       # connect to the PostgreSQL database
-      conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com", 
-                              database = "cs4920", 
-                              user = "gill", 
+      conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com",
+                              database = "cs4920",
+                              user = "gill",
                               password = "gill")
 
       # create a new cursor
       cur = conn.cursor()
-      
-      # check if the username is used before 
+
+      # check if the username is used before
       cur.execute('SELECT password, salt,id FROM users WHERE username = %s;', (username,))
       exist = cur.fetchall()
 
@@ -489,12 +492,12 @@ def login_verify():
 
       # Get the salt from the fetched results, then
       # compare stored hash with that of the input password (plus salt)
-      pwd_hash, salt,uid = exist[0] 
-      password += salt            
+      pwd_hash, salt,uid = exist[0]
+      password += salt
 
       h = hashlib.sha256()
       h.update(password.encode(encoding='utf8'))
-      
+
       if pwd_hash == h.hexdigest():
          session_tok = uuid.uuid1()
 
@@ -507,12 +510,12 @@ def login_verify():
          cur.close()
          conn.close()
 
-         return json.dumps({'success':True, "token":str(session_tok),"uid":uid }), 200, {'ContentType':'application/json'} 
+         return json.dumps({'success':True, "token":str(session_tok),"uid":uid }), 200, {'ContentType':'application/json'}
 
       # close the connection to the postgresql database
       cur.close()
       conn.close()
-      return json.dumps({'success':False}), 200, {'ContentType':'application/json'} 
+      return json.dumps({'success':False}), 200, {'ContentType':'application/json'}
 
    except (Exception, psycopg2.DatabaseError) as error:
       print(error,file=sys.stderr)
@@ -532,25 +535,25 @@ def add_completed_course():
     operation = data.get('type')
     print(course,file=sys.stderr)
     """ insert a new review """
-    sql = """insert into completed_courses(uid,ccode) 
+    sql = """insert into completed_courses(uid,ccode)
                 values(%s,UPPER(%s));"""
-    
+
     if(operation == 'DEL'):
         sql=""" DELETE FROM completed_courses where uid=%s and ccode=UPPER(%s);"""
 
     conn = None
     vendor_id = None
-    
+
     try:
         # read database configuration
         # connect to the PostgreSQL database
-        conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com", 
-                           database = "cs4920", 
-                           user = "gill", 
+        conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com",
+                           database = "cs4920",
+                           user = "gill",
                            password = "gill")
         cur = conn.cursor()
         cur.execute(sql,(user,course))
-        conn.commit() 
+        conn.commit()
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error,file=sys.stderr)
@@ -565,22 +568,22 @@ def completed_courses():
     data = request.get_json()
     course = data.get('term','')
     user = data.get('user','')
-    sql = """SELECT * FROM courses 
+    sql = """SELECT * FROM courses
             WHERE (code LIKE UPPER('%s')) ; """
 
 
-    checkcomplete ="""select exists(select 1 from completed_courses where 
+    checkcomplete ="""select exists(select 1 from completed_courses where
                     uid=%s and ccode=UPPER(%s)) ;"""
-    
+
     conn = None
     vendor_id = None
     try:
-        conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com", 
-                           database = "cs4920", 
-                           user = "gill", 
+        conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com",
+                           database = "cs4920",
+                           user = "gill",
                            password = "gill")
         cur = conn.cursor()
-        cur.execute(sql % course) 
+        cur.execute(sql % course)
         records = cur.fetchall()
         if (cur.rowcount != 0):
             cur.execute(checkcomplete,(user,course))
@@ -588,7 +591,7 @@ def completed_courses():
 
         conn.commit()
         cur.close()
-        if conn is not None: 
+        if conn is not None:
             conn.close()
         return json.dumps(records)
     except (Exception, psycopg2.DatabaseError) as error:
@@ -603,22 +606,22 @@ def completed_courses():
 def get_all_reviewed():
     data = request.get_json()
     user = data.get('user','')
-    sql = """SELECT * FROM reviews 
+    sql = """SELECT * FROM reviews
             WHERE uid=%s ; """
 
-    
+
     conn = None
     vendor_id = None
     try:
-        conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com", 
-                           database = "cs4920", 
-                           user = "gill", 
+        conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com",
+                           database = "cs4920",
+                           user = "gill",
                            password = "gill")
         cur = conn.cursor()
-        cur.execute(sql % user) 
+        cur.execute(sql % user)
         records = cur.fetchall()
         cur.close()
-        if conn is not None: 
+        if conn is not None:
             conn.close()
         return json.dumps(records)
     except (Exception, psycopg2.DatabaseError) as error:
@@ -631,23 +634,23 @@ def get_all_reviewed():
 def get_all_completed():
     data = request.get_json()
     user = data.get('user','')
-    sql = """SELECT ccode FROM completed_courses 
+    sql = """SELECT ccode FROM completed_courses
             WHERE uid=%s ; """
 
-    
+
     conn = None
     vendor_id = None
     try:
-        conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com", 
-                           database = "cs4920", 
-                           user = "gill", 
+        conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com",
+                           database = "cs4920",
+                           user = "gill",
                            password = "gill")
         cur = conn.cursor()
-        cur.execute(sql % user) 
+        cur.execute(sql % user)
         records = cur.fetchall()
-        
+
         cur.close()
-        if conn is not None: 
+        if conn is not None:
             conn.close()
         return json.dumps(records)
     except (Exception, psycopg2.DatabaseError) as error:
@@ -661,16 +664,16 @@ def get_user_information():
     user = data.get('user')
 
     sql ="""select username, nickname,program,major from users where id=%s ;"""
-    
+
     conn = None
     vendor_id = None
     try:
-        conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com", 
-                           database = "cs4920", 
-                           user = "gill", 
+        conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com",
+                           database = "cs4920",
+                           user = "gill",
                            password = "gill")
         cur = conn.cursor()
-        cur.execute(sql % user) 
+        cur.execute(sql % user)
         records = cur.fetchall()
 
         conn.commit()
@@ -683,7 +686,7 @@ def get_user_information():
         if cur is not None:
             cur.close()
 
-    return json.dumps({'success':True, "name":records[0][1],"username":records[0][0],"program":records[0][2],"major":records[0][3] }), 200, {'ContentType':'application/json'} 
+    return json.dumps({'success':True, "name":records[0][1],"username":records[0][0],"program":records[0][2],"major":records[0][3] }), 200, {'ContentType':'application/json'}
 
 
 
@@ -699,18 +702,18 @@ def set_user_information():
     sql = """update users set major=%s, program=%s,
              nickname=%s where id=%s ;"""
     conn = None
-    
+
     try:
         # read database configuration
         # connect to the PostgreSQL database
-        conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com", 
-                           database = "cs4920", 
-                           user = "gill", 
+        conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com",
+                           database = "cs4920",
+                           user = "gill",
                            password = "gill")
         cur = conn.cursor()
-        
+
         cur.execute(sql,(major,program,dispname,uid))
-        
+
         conn.commit()
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
@@ -742,9 +745,9 @@ def flagPost():
    post_id = data.get('post', '')
 
    if post_id == '':
-      return json.dumps({'success': 'Updated ? = 0'}), 200, {'ContentType':'application/json'} 
+      return json.dumps({'success': 'Updated ? = 0'}), 200, {'ContentType':'application/json'}
    else:
-      _, post_id = post_id.split('_', 1)     
+      _, post_id = post_id.split('_', 1)
 
    conn = None
    cur = None
@@ -752,9 +755,9 @@ def flagPost():
 
    try:
       # connect to the PostgreSQL database
-      conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com", 
-                              database = "cs4920", 
-                              user = "gill", 
+      conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com",
+                              database = "cs4920",
+                              user = "gill",
                               password = "gill")
 
       # create a new cursor and flag the post with id == post_id
@@ -775,9 +778,9 @@ def flagPost():
       if conn is not None:
          conn.close()
 
-   return json.dumps({'success': "Updated ? = " + updated}), 200, {'ContentType':'application/json'} 
+   return json.dumps({'success': "Updated ? = " + updated}), 200, {'ContentType':'application/json'}
 
-   
+
 @app.route('/deletePost', methods=['POST'])
 def deletePost():
 
@@ -786,17 +789,17 @@ def deletePost():
    post_id = data.get('post', '')
 
    if post_id == '':
-      return json.dumps({'success': "Deleted ? = 0"}), 200, {'ContentType':'application/json'} 
-  
+      return json.dumps({'success': "Deleted ? = 0"}), 200, {'ContentType':'application/json'}
+
    conn = None
    cur = None
    deleted = '0'
 
    try:
       # connect to the PostgreSQL database
-      conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com", 
-                              database = "cs4920", 
-                              user = "gill", 
+      conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com",
+                              database = "cs4920",
+                              user = "gill",
                               password = "gill")
 
       # create a new cursor and Delete the post with id == post_id
@@ -817,8 +820,22 @@ def deletePost():
       if conn is not None:
          conn.close()
 
-   return json.dumps({'success': "Deleted ? = " + deleted}), 200, {'ContentType':'application/json'} 
+   return json.dumps({'success': "Deleted ? = " + deleted}), 200, {'ContentType':'application/json'}
 
+
+# https://stackoverflow.com/questions/67631/how-to-import-a-module-given-the-full-path
+def run_recommender():
+    # spec = importlib.util.spec_from_file_location("recommender.main", "../www/recommender.py")
+    # cr = importlib.util.module_from_spec(spec)
+    # spec.loader.exec_module(cr)
+
+    runpy.run_path("../www/recommender.py") # executes the other python script
+    with open('../db/course_recommendations.csv', 'r') as f:
+        reader = csv.reader(f)
+        course_list = list(reader)
+
+        # print (course_list)
+        return (course_list)
 
 
 if __name__ == '__main__':
