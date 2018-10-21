@@ -824,7 +824,7 @@ def run_recommender():
         course_list = list(reader)
 
         # print (course_list)
-        return (course_list)
+        return json.dumps(course_list)
 
 
 

@@ -4,13 +4,13 @@
 # http://computerscience.fyi/which-book-should-i-read-next-recommendation-engine-with-item-item-collaborative-filtering/
 # Based on cosine similiarity - https://en.wikipedia.org/wiki/Cosine_similarity
 
+from __future__ import print_function
 import pandas as pd
 import numpy as np
 import math
 import psycopg2
 import sys
 from scipy.spatial.distance import cosine
-
 
 def main():
     # import the postgre db as csv and parse into pandas
