@@ -7,24 +7,29 @@
 import pandas as pd
 import numpy as np
 import math
+import psycopg2
+import sys
 from scipy.spatial.distance import cosine
+
 
 def main():
     # import the postgre db as csv and parse into pandas
     try:
-       # connect to the PostgreSQL database
-       conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com",
+        # connect to the PostgreSQL database
+        conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com",
                                database = "cs4920",
                                user = "gill",
                                password = "gill")
 
-       # create a new cursor and Delete the post with id == post_id
-       cur = conn.cursor()
-       cur.execute('COPY (SELECT course, uid, rating from reviews) TO "../db/courses_review.csv" WITH CSV HEADER')
-       # records = cur.fetchall()
+        # create a new cursor and Delete the post with id == post_id
+        cur = conn.cursor()
+        outputQuery = 'COPY (SELECT course, uid, rating from reviews) TO STDOUT WITH CSV HEADER'
+        # records = cur.fetchall()
+        with open("../db/course_review.csv", 'w') as f:
+            cur.copy_expert(outputQuery, f)
 
-       cur.close()
-       conn.close()
+        cur.close()
+        conn.close()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error,file=sys.stderr)
         if conn is not None:
@@ -46,10 +51,10 @@ def main():
             title_similarities.iloc[i,j] = 1 - cosine(user_reviews_matrix.iloc[:,i], user_reviews_matrix.iloc[:,j])
 
     # Recommends the top 15 courses to take (empty table)
-    recommendations = pd.DataFrame(index=title_similarities.columns, columns=range(1,21))
+    recommendations = pd.DataFrame(index=title_similarities.columns, columns=range(1,6))
 
     for i in range(0, len(title_similarities)):
-        recommendations.iloc[i,:20] = title_similarities.iloc[0:,i].sort_values(ascending=False)[:20].index
+        recommendations.iloc[i,:5] = title_similarities.iloc[0:,i].sort_values(ascending=False)[:5].index
     recommendations.to_csv('../db/course_recommendations.csv')
 
     # https://stackoverflow.com/questions/2987433/how-to-import-csv-file-data-into-a-postgresql-table
