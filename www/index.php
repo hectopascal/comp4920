@@ -66,7 +66,7 @@
 	<span class="text-light" id="username_text" style="display:none"></span>
 
 
-  <div class ="modal" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="loginModalLabel" aria-hidden="true">
+  <div class ="modal" id="loginModal" data-backdrop="false" tabindex="-1" role="dialog" aria-labelledby="loginModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
 	  <div class="modal-content">
 	    <div class="modal-header">
@@ -86,7 +86,9 @@
 		<div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
 		  <button id="loginButton" type="button" class="btn btn-primary">Login</button>
+
 		</div>
+		<div id="login-denied-alert" class="alert alert-danger" role="alert" style="display:none">Login denied!</div>
       </div>
 	</div>
   </div>

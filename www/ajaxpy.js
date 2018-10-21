@@ -252,9 +252,12 @@ function appear_loggedin(username)
 	document.getElementById("username_runnup").setAttribute("style", "display:block");
 
 	document.getElementById("logoutButton").setAttribute("style", "display:block");
+
+	$('#loginModal').modal('hide');
+	document.getElementById("login-denied-alert").setAttribute("style", "display:none");
 }
 
-function appear_loggedout()
+function appear_loggedout(is_login_modal)
 {
 	var login_button = document.getElementById("login_button");
 	var signup_button = document.getElementById("signupButton");
@@ -268,6 +271,9 @@ function appear_loggedout()
 	document.getElementById("username_runnup").setAttribute("style", "display:none");
 
 	document.getElementById("logoutButton").setAttribute("style", "display:none");
+
+	if(is_login_modal)
+		document.getElementById("login-denied-alert").setAttribute("style", "display:block");
 }
 
 function get_cookie_dat()
@@ -414,6 +420,8 @@ $(document).ready(function(){
 					document.cookie = "username="+username.toString();
 					document.cookie = "session="+response.token.toString();
 				}
+				else
+					appear_loggedout(true);
 				//login_success();
             }, error: function(result,ts,err) {
 				console.log("login failed");
@@ -435,7 +443,7 @@ $(document).ready(function(){
             success: function(response) {
 				if(response.success)
 				{
-					appear_loggedout();
+					appear_loggedout(false);
 					// This cookie will exist until the browser closes
 					document.cookie = "username=";
 					document.cookie = "session=";
