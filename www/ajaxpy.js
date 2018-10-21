@@ -322,7 +322,25 @@ function try_authenticate()
 		}
 	});
 }
+function get_recommended_courses(){
+	$.ajax({
+		url: '/cgi-bin/index.cgi/getrecs',
+		async: false,
+		type: 'POST',
+		dataType: 'json',
+		contentType: 'application/json',
+		success: function(response) {
+    
+            console.log('cookie authentication success');
+		    console.log(response);
+        
+        }, error: function(result,ts,err) {
+			console.log('cookie authentication error');
+			console.log([result,ts,err]);
+		}
+	});
 
+}
 $(document).ready(function(){
 	$(window).scroll(function() { //if scrolled to bottom, ajax post and buffer more
 		if ((window.innerHeight + window.pageYOffset) >= document.body.offsetHeight && hitbottom){

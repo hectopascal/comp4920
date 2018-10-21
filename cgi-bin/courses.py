@@ -10,7 +10,6 @@ import sys
 import urllib2
 import hashlib
 import uuid
-import importlib, importlib.util
 import csv
 import runpy
 
@@ -827,7 +826,7 @@ def deletePost():
       # deleted - whether or not the post is deleted (0:NO , 1:YES)
       conn.commit()
       response = post_id
- 
+
    except psycopg2.Error as e:
       print(e, file=sys.stderr)
 
@@ -842,14 +841,9 @@ def deletePost():
 
 
 
-# https://stackoverflow.com/questions/67631/how-to-import-a-module-given-the-full-path
 def run_recommender():
-    # spec = importlib.util.spec_from_file_location("recommender.main", "../www/recommender.py")
-    # cr = importlib.util.module_from_spec(spec)
-    # spec.loader.exec_module(cr)
-
-    runpy.run_path("../www/recommender.py") # executes the other python script
-    with open('../db/course_recommendations.csv', 'r') as f:
+    runpy.run_path("recommender.py") # executes the other python script
+    with open('course_recommendations.csv', 'r') as f:
         reader = csv.reader(f)
         course_list = list(reader)
 
@@ -858,4 +852,5 @@ def run_recommender():
 
 
 if __name__ == '__main__':
-   app.run()
+   # app.run()
+   run_recommender();
