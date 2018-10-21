@@ -10,6 +10,7 @@ import sys
 import urllib2
 import hashlib
 import uuid
+#import importlib, importlib.util
 import csv
 import runpy
 
@@ -662,7 +663,7 @@ def get_user_information():
     data = request.get_json()
     user = data.get('user')
 
-    sql ="""select username, nickname,program,major from users where id=%s ;"""
+    sql ="""select username, nickname from users where id=%s ;"""
 
     conn = None
     vendor_id = None
@@ -685,57 +686,11 @@ def get_user_information():
         if cur is not None:
             cur.close()
 
-    return json.dumps({'success':True, "name":records[0][1],"username":records[0][0],"program":records[0][2],"major":records[0][3] }), 200, {'ContentType':'application/json'}
+    return json.dumps({'success':True, "name":records[0][1],"username":records[0][0] }), 200, {'ContentType':'application/json'}
 
-
-
-
-@app.route('/saveuser', methods=['POST'] )
-def set_user_information():
-    print(request.data,file=sys.stderr)
-    data = request.get_json()
-    uid = data.get('uid')
-    dispname = data.get('dispname')
-    major = data.get('major')
-    program = data.get('program')
-    sql = """update users set major=%s, program=%s,
-             nickname=%s where id=%s ;"""
-    conn = None
-
-    try:
-        # read database configuration
-        # connect to the PostgreSQL database
-        conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com",
-                           database = "cs4920",
-                           user = "gill",
-                           password = "gill")
-        cur = conn.cursor()
-
-        cur.execute(sql,(major,program,dispname,uid))
-
-        conn.commit()
-        cur.close()
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error,file=sys.stderr)
-    finally:
-        if conn is not None:
-            conn.close()
-    return  json.dumps({'success':True}), 200, {'ContentType':'application/json'}
-
-
-
-############ Functions for admin stuff - delete post
+############
 @app.route('/adminPage', methods=['POST'])
 def adminPage():
-   data = request.get_json()
-   username = data.get('user', '')
-   session_token = data.get('session', '')
-
-   sql = "SELECT * FROM users WHERE username=%s AND token=%s AND role='admin'"
-   is_admin = queryDatabase(sql, (username, session_token))
-
-   if not is_admin:
-      return 'not admin'
 
    # Returns only "inappropriate" or "flagged" reviews
    sql = 'SELECT id, course, author, feedback FROM reviews WHERE flagged = TRUE ORDER BY id ;'
@@ -792,25 +747,14 @@ def deletePost():
 
    # get the post_id from the json object parsed
    data = request.get_json()
-   username = data.get('user', '')
-   session_token = data.get('session', '')
-
-   sql = "SELECT * FROM users WHERE username=%s AND token=%s AND role='admin'"
-   is_admin = queryDatabase(sql, (username, session_token))
-
-   if not is_admin:
-      return json.dumps({'success': "You must be an admin to delete a review !!"}), 200, {'ContentType':'application/json'}
-
-
-
-   post_id = data.get('post_id', '')
+   post_id = data.get('post', '')
 
    if post_id == '':
-      return json.dumps({'success': "post_id cannot be EMPTY !!"}), 200, {'ContentType':'application/json'}
+      return json.dumps({'success': "Deleted ? = 0"}), 200, {'ContentType':'application/json'}
 
    conn = None
    cur = None
-   response = 'The review is NOT deleted'
+   deleted = '0'
 
    try:
       # connect to the PostgreSQL database
@@ -825,7 +769,7 @@ def deletePost():
 
       # deleted - whether or not the post is deleted (0:NO , 1:YES)
       conn.commit()
-      response = post_id
+      deleted = cur.statusmessage[-1]
 
    except psycopg2.Error as e:
       print(e, file=sys.stderr)
@@ -837,19 +781,55 @@ def deletePost():
       if conn is not None:
          conn.close()
 
-   return json.dumps({'success': response}), 200, {'ContentType':'application/json'}
+   return ""
 
 
+# @app.route('/updateRecommender', methods=['POST'])
+# def updateRecommender():
+#     conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com",
+#                             database = "cs4920",
+#                             user = "gill",
+#                             password = "gill")
+#
+#     # create a new cursor and Delete the post with id == post_id
+#     cur = conn.cursor()
+#
+#     reviews = pd.read_csv('../db/course_recommendations.csv', delimiter=',', header=0, names=['course','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20'])
+#     cur.execute('COPY reviews FROM "../db/course_recommendations" WITH DELIMITER "," CSV HEADER)
+#     conn.commit()
+#     update = cur.statusmessage[-1]
+#
+#     except psycopg2.Error as e:
+#        print(e, file=sys.stderr)
+#     finally:
+#       if cur is not None:
+#          cur.close()
+#
+#       if conn is not None:
+#          conn.close()
+#
+#     return json.dumps({'success': "Updated ? = " + update}), 200, {'ContentType':'application/json'}
 
+
+# https://stackoverflow.com/questions/67631/how-to-import-a-module-given-the-full-path
+@app.route('/getrecs', methods=['POST'])
 def run_recommender():
+    # spec = importlib.util.spec_from_file_location("recommender.main", "../www/recommender.py")
+    # cr = importlib.util.module_from_spec(spec)
+    # spec.loader.exec_module(cr)
+    data = request.get_json()
+    uid = data.get('uid', '')
+    recommended=[]
+    course_list = []
+    records = ''
     runpy.run_path("recommender.py") # executes the other python script
     with open('course_recommendations.csv', 'r') as f:
         reader = csv.reader(f)
         course_list = list(reader)
         # print (course_list)
-
-
-
+    
+    
+    
     sql = """SELECT ccode FROM completed_courses
             WHERE uid=%s ; """
 
@@ -880,7 +860,7 @@ def run_recommender():
         for j in i:
             if j not in all_courses:
                 all_courses.append(j)
-
+    
 
     for courses in records:
         for i in range(0,len(course_list)):
@@ -893,6 +873,8 @@ def run_recommender():
     return json.dumps(recommended)
 
 
+
 if __name__ == '__main__':
    # app.run()
    run_recommender();
+
