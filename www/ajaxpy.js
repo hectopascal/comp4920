@@ -76,7 +76,7 @@ function post_courses(type,query,containerId='main_body'){
             success: function(response) {
                 console.log((response));
                 complete = response.splice(-1,1);
-                display_courses(response,containerId,complete);
+                display_codes(response,complete);
 				curpage = COMPLETE;
                 hitbottom=false;
             }, error: function(result,ts,err) {
@@ -112,17 +112,22 @@ function post_courses(type,query,containerId='main_body'){
 }
 document.addEventListener("DOMContentLoaded", main);
 function addCompletedListener(c_code,checked){
-    $("#add_"+c_code).click(function() {
+    $("#add_"+c_code).unbind().click(function() {
+
         var course = $(this).attr('id').split('_')[1];
-        console.log(course);
         var buttontext = document.createTextNode("Uncompleted");
+        console.log(checked);
         if(checked ===false){
+            console.log("Adding course "+course);
             post_courses(ADDCOMP,course);
             var buttontext = document.createTextNode("Completed");
+			addToList(course.toUpperCase());	
             checked = true;
         } else{
+            console.log("Removing course "+course);
             post_courses(DELCOMP,course);
             checked = false;
+            rmFromList(course.toUpperCase());
         }
 
         $(this).empty();
