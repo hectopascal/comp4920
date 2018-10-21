@@ -1,0 +1,25 @@
+.scrollable{
+  height:300px;
+  overflow-y:scroll;
+  width:100%;
+}
+
+.delete {
+  cursor: pointer;
+  float: right;
+  display: inline-block;
+  transition: opacity .15s;
+}
+.delete:hover {
+  opacity: .5;
+}
+.fade li {
+  transition: all 0.4s ease-out;
+  opacity: 0;
+  height: 2em;
+}
+.fade li.show {
+  opacity: 1;
+}
+
+

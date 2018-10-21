@@ -8,11 +8,12 @@
 		<!-- Font Fonts -->
 		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
 		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins">
+		<link rel="stylesheet" href="custom.css">
 		<!-- Bootrap JS & JQuery -->
 <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
 		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
-        <script src="helperfunctions.js"><script>
+        <script src="helperfunctions.js"></script>
         <script src="badwords.js"></script>
         <script src="reviews.js"></script>
         
@@ -39,9 +40,6 @@
         <a class="nav-link" id="useracc">Account</a>
       </li>
 
-      <li class="nav-item">
-        <a class="nav-link" id="useradd">Add Courses</a>
-      </li>
       <li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           Filter
