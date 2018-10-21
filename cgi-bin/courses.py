@@ -817,14 +817,60 @@ def run_recommender():
     # spec = importlib.util.spec_from_file_location("recommender.main", "../www/recommender.py")
     # cr = importlib.util.module_from_spec(spec)
     # spec.loader.exec_module(cr)
-
+    data = request.get_json()
+    uid = data.get('uid', '')
+    recommended=[]
+    course_list = []
+    records = ''
     runpy.run_path("recommender.py") # executes the other python script
     with open('course_recommendations.csv', 'r') as f:
         reader = csv.reader(f)
         course_list = list(reader)
-
         # print (course_list)
-        return json.dumps(course_list)
+    
+    
+    
+    sql = """SELECT ccode FROM completed_courses
+            WHERE uid=%s ; """
+
+    conn = None
+    vendor_id = None
+
+    try:
+        conn = psycopg2.connect(host = "cs4920.ckc9ybbol3wz.ap-southeast-2.rds.amazonaws.com",
+                           database = "cs4920",
+                           user = "gill",
+                           password = "gill")
+        cur = conn.cursor()
+        cur.execute(sql % uid)
+        records = cur.fetchall()
+
+        cur.close()
+        if conn is not None:
+            conn.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error,file=sys.stderr)
+        if conn is not None:
+            conn.close()
+    print(records,file=sys.stderr)
+    course_list = course_list[1:]
+    print(course_list,file=sys.stderr)
+    all_courses = []
+    for i in course_list:
+        for j in i:
+            if j not in all_courses:
+                all_courses.append(j)
+    
+
+    for courses in records:
+        for i in range(0,len(course_list)):
+            if courses[0] == course_list[i][0]:
+                for j in range(1,len(course_list[i])):
+                    recommended.append(course_list[i][j])
+    for courses in records:
+        if courses[0] in recommended:
+            recommended.remove(courses[0])
+    return json.dumps(recommended)
 
 
 

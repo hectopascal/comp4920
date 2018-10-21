@@ -328,14 +328,15 @@ function get_recommended_courses(){
 		type: 'POST',
 		dataType: 'json',
 		contentType: 'application/json',
+        data: JSON.stringify({"uid":userId}),
 		success: function(response) {
             var ul = document.getElementById('rec_list');  
 		    console.log(response);
-            for(var i =0;i<response[1].length;++i){
+            for(var i =0;i<response.length;++i){
                 var li = document.createElement("li");
                 li.setAttribute('class','list-group-item course_done');
-			    li.id = "rec_"+response[1][i];
-                li.appendChild(document.createTextNode(response[1][i]));
+			    li.id = "rec_"+response[i];
+                li.appendChild(document.createTextNode(response[i]));
                 ul.appendChild(li);
 
             }  
