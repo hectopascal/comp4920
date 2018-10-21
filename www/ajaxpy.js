@@ -339,6 +339,7 @@ $(document).ready(function(){
             return $('#popover-content').html();
         }
     });
+    /*
     $('#useradd').click(function(e){
         if(userId!=0){ //logged in
 			document.getElementById("useracc").setAttribute("class", "nav-link");
@@ -354,11 +355,10 @@ $(document).ready(function(){
 
 		    }
         }
-    });
+    });*/
     $('#useracc').click(function(e){
         if(userId!=0){ //logged in
 			document.getElementById("useracc").setAttribute("class", "nav-link active");
-			document.getElementById("useradd").setAttribute("class", "nav-link");
             showAccountSettings();
         } else { //not logged in!
 			if(!wait){
