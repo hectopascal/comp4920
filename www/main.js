@@ -269,6 +269,82 @@ function display_reviews(c_code, results)
 }
 
 
+
+function show_admin_reviews(reviews) {
+   if (reviews != null) { 
+      var main_body = document.getElementById('main_body');
+      var cookie_dat = get_cookie_dat();
+
+      for (var i = 0; i < reviews.length; i++) {
+         var div = document.createElement("div")
+         var p1 = document.createElement("p");
+         var p2 = document.createElement("p");        
+         var p3 = document.createElement("p");
+         var br = document.createElement("br");
+         var btn = document.createElement("button");
+         var postID = reviews[i][0];
+
+         div.setAttribute('id', 'admin_' + postID);
+         div.setAttribute('class', 'p-3 bg-white course_summary');
+         div.setAttribute("style", 'margin-top:5px;margin-bottom:5px; box-shadow:0 0 3px 0 rgba(0,0,0,0.2); border-radius:10px;');
+       
+         btn.textContent = "Delete Post " + postID;
+	      btn.setAttribute('type', 'submit');
+         btn.setAttribute('class', 'btn btn-default');
+         btn.setAttribute('post', postID);
+
+         btn.addEventListener('click', function() {
+
+            $.ajax({
+               url: '/cgi-bin/index.cgi/deletePost',
+               async: false,
+               type: 'POST',
+               datatype: 'json',
+               contentType: 'application/json',
+               data: JSON.stringify({user: cookie_dat[0], session: cookie_dat[1], post_id: $(this).attr("post")}),        // authentication details
+              
+               success: function(response) {
+                  console.log(response);    
+                  
+                  var obj = JSON.parse(response);
+                  var id  = obj.success;
+
+                  console.log(id);
+
+                  if (/^\d+$/.test(id)) {
+                     console.log("Response is an integer !!");
+
+                     var main = document.getElementById('main_body');
+                     var del = document.getElementById('admin_' + id);
+                     main.removeChild(del);
+                  } else {
+                     console.log("Response is NOT an integer !!");
+                  }
+ 
+               },
+
+               error: function(results, ts, err) {
+                  console.log([results, ts, err]);
+               }
+            });
+
+         });
+
+         p1.innerHTML = '<b>Course:</b> ' + reviews[i][1];
+         p2.innerHTML = '<b>User:</b> ' + reviews[i][2];
+         p3.innerHTML = '<b>Review:</b> ' + reviews[i][3];
+         div.appendChild(p1);
+         div.appendChild(p2);
+         div.appendChild(p3);
+         div.appendChild(btn);
+         main_body.appendChild(div);
+         main_body.appendChild(br);
+      }
+   }
+}
+
+
+
 function reviewForm(c_code)
 {
     var div = document.createElement('div');

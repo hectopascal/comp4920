@@ -725,11 +725,18 @@ def set_user_information():
 
 
 
-
-
-############
+############ Functions for admin stuff - delete post
 @app.route('/adminPage', methods=['POST'])
 def adminPage():
+   data = request.get_json()
+   username = data.get('user', '')
+   session_token = data.get('session', '')
+
+   sql = "SELECT * FROM users WHERE username=%s AND token=%s AND role='admin'"
+   is_admin = queryDatabase(sql, (username, session_token))
+
+   if not is_admin:
+      return 'not admin'
 
    # Returns only "inappropriate" or "flagged" reviews
    sql = 'SELECT id, course, author, feedback FROM reviews WHERE flagged = TRUE ORDER BY id ;'
@@ -786,14 +793,25 @@ def deletePost():
 
    # get the post_id from the json object parsed
    data = request.get_json()
-   post_id = data.get('post', '')
+   username = data.get('user', '')
+   session_token = data.get('session', '')
+
+   sql = "SELECT * FROM users WHERE username=%s AND token=%s AND role='admin'"
+   is_admin = queryDatabase(sql, (username, session_token))
+
+   if not is_admin:
+      return json.dumps({'success': "You must be an admin to delete a review !!"}), 200, {'ContentType':'application/json'}
+
+
+
+   post_id = data.get('post_id', '')
 
    if post_id == '':
-      return json.dumps({'success': "Deleted ? = 0"}), 200, {'ContentType':'application/json'}
+      return json.dumps({'success': "post_id cannot be EMPTY !!"}), 200, {'ContentType':'application/json'}
 
    conn = None
    cur = None
-   deleted = '0'
+   response = 'The review is NOT deleted'
 
    try:
       # connect to the PostgreSQL database
@@ -808,8 +826,8 @@ def deletePost():
 
       # deleted - whether or not the post is deleted (0:NO , 1:YES)
       conn.commit()
-      deleted = cur.statusmessage[-1]
-
+      response = post_id
+ 
    except psycopg2.Error as e:
       print(e, file=sys.stderr)
 
@@ -820,7 +838,8 @@ def deletePost():
       if conn is not None:
          conn.close()
 
-   return json.dumps({'success': "Deleted ? = " + deleted}), 200, {'ContentType':'application/json'}
+   return json.dumps({'success': response}), 200, {'ContentType':'application/json'}
+
 
 
 # https://stackoverflow.com/questions/67631/how-to-import-a-module-given-the-full-path

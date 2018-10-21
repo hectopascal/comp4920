@@ -430,6 +430,44 @@ $(document).ready(function(){
         });
     });
 
+   $("#admin").click(function(e) {
+      clear_children("main_body");
+      e.preventDefault();
+      cookie_dat = get_cookie_dat();
+
+      $.ajax({
+         url: '/cgi-bin/index.cgi/adminPage',
+         async: false,
+         type: 'POST',
+         datatype: 'json',
+         contentType: 'application/json',
+         data: JSON.stringify({"user":cookie_dat[0], "session":cookie_dat[1]}),        // authentication details
+        
+         success: function(response) {
+            console.log(response);
+
+            if (response != "not admin") {
+               hitbottom = false;
+               show_admin_reviews(JSON.parse(response));
+            } else {
+
+               $('<div class="alert alert-warning" role="alert">Admin required!</div>').insertBefore('#main_body').delay(3000).fadeOut(function(){
+                   $(this).remove();
+               });
+
+            }
+
+         },
+
+         error: function(results, ts, err) {
+            console.log([results, ts, err]);
+         }
+      });
+ 
+   });
+
+
+
 	$("#logoutButton").click(function(e) {
 		e.preventDefault();
 		cookie_dat = get_cookie_dat();
