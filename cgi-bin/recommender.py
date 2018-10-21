@@ -74,10 +74,12 @@ def main():
     #
     #     # create a new cursor and Delete the post with id == post_id
     #     cur = conn.cursor()
-    #     outputQuery = 'COPY (SELECT course, uid, rating from reviews) TO STDOUT WITH CSV HEADER'
-    #     # records = cur.fetchall()
-    #     with open("course_review.csv", 'w') as f:
-    #         cur.copy_expert(outputQuery, f)
+    #
+    #     with open('course_recommendations.csv', 'r') as f:
+    #         # Notice that we don't need the `csv` module.
+    #         next(f)  # Skip the header row.
+    #         print(f)
+    #         cur.copy_from(f, 'course_recommendations', sep=',', columns=('course', 'match1', 'match2', 'match3', 'match4', 'match5'))
     #
     #     cur.close()
     #     conn.close()
