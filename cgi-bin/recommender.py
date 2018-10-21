@@ -25,7 +25,7 @@ def main():
         cur = conn.cursor()
         outputQuery = 'COPY (SELECT course, uid, rating from reviews) TO STDOUT WITH CSV HEADER'
         # records = cur.fetchall()
-        with open("../db/course_review.csv", 'w') as f:
+        with open("course_review.csv", 'w') as f:
             cur.copy_expert(outputQuery, f)
 
         cur.close()
@@ -36,7 +36,7 @@ def main():
             conn.close()
         return "Error Error Error !!!"
 
-    reviews = pd.read_csv('../db/course_review.csv', delimiter=',', header=0, names=['course','uid','rating'])
+    reviews = pd.read_csv('course_review.csv', delimiter=',', header=0, names=['course','uid','rating'])
     # print(reviews.head(5))
     user_reviews_matrix = pd.pivot_table(reviews, index='uid', columns='course', values='rating',aggfunc='first')
 
@@ -55,7 +55,7 @@ def main():
 
     for i in range(0, len(title_similarities)):
         recommendations.iloc[i,:5] = title_similarities.iloc[0:,i].sort_values(ascending=False)[:5].index
-    recommendations.to_csv('../db/course_recommendations.csv')
+    recommendations.to_csv('course_recommendations.csv')
 
     # https://stackoverflow.com/questions/2987433/how-to-import-csv-file-data-into-a-postgresql-table
 
